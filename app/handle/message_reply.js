@@ -102,7 +102,7 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Fishing }) {
 					}
 					else if (body == '6') {
 						const semver = require('semver');
-						axios.get('https://raw.githubusercontent.com/roxtigger2003/mirai/master/package.json').then((res) => {
+						axios.get('https://raw.githubusercontent.com/roxtigger2003/mirai-beta/master/package.json').then((res) => {
 							var local = JSON.parse(fs.readFileSync('./package.json')).version;
 							if (semver.lt(local, res.data.version)) {
 								api.sendMessage(getText('newUpdate'), threadID);
