@@ -20,7 +20,7 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Fishing }) {
 	function getText(...args) {
 		const langText = {...__GLOBAL.language.reply, ...__GLOBAL.language.fishing};
 		const getKey = args[0];
-		if (!langText.hasOwnProperty(getKey)) throw `${__dirname} - Not found key language: ${getKey}`;
+		if (!langText.hasOwnProperty(getKey)) throw `${__filename} - Not found key language: ${getKey}`;
 		let text = langText[getKey].replace(/\\n/gi, '\n');
 		for (let i = 1; i < args.length; i++) {
 			let regEx = RegExp(`%${i}`, 'g');
@@ -232,7 +232,7 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Fishing }) {
 				case "domath": {
 					const timeout = event.messageReply.timestamp + 15000;
 					if (event.timestamp - timeout >= 0) return api.sendMessage(getText('outOfTime'), threadID);
-					(body == replyMessage.answer) ? api.sendMessage(getText('correctAns', (event.timestamp - event.messageReply.timestamp) / 1000), threadID) : api.sendMessage(`ahh, có vẻ bạn đã trả lời sai, câu trả lời đúng là: ${replyMessage.answer}`, threadID);
+					(body == replyMessage.answer) ? api.sendMessage(getText('correctAns', (event.timestamp - event.messageReply.timestamp) / 1000), threadID) : api.sendMessage(getText('wrongAnsMath', replyMessage.answer), threadID);
 					__GLOBAL.reply.splice(indexOfReply, 1);
 					break;
 				}
@@ -310,7 +310,7 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Fishing }) {
 							inventory.sharks -= valueSteal;
 							typeSteal = getText('sharks');
 						}
-						api.sendMessage((event.timestamp - timeout >= 0) ? getText('outOfTime2', valueSteal, typeSteal) :  getText('wrongAnswer', valueSteal, typeSteal), threadID);
+						api.sendMessage((event.timestamp - timeout >= 0) ? getText('outOfTime2', valueSteal, typeSteal) :  getText('wrongAnsFish', valueSteal, typeSteal), threadID);
 					}
 					if (parseInt(body) == parseInt(replyMessage.answer)) {
 						if (roll <= 400) {
@@ -361,28 +361,29 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Fishing }) {
 					break;
 				}
 				case "media_video": {
-					if (isNaN(body) || parseInt(body) <= 0 || parseInt(body) > 5) return api.sendMessage("chọn từ 1 đến 5", threadID);
+					if (isNaN(body) || parseInt(body) <= 0 || parseInt(body) > 5) return api.sendMessage(getText('chooseVA'), threadID);
 					const ytdl = require("ytdl-core");
 					var link = `https://www.youtube.com/watch?v=${replyMessage.url[body -1]}`
-					ytdl.getInfo(link, (err, info) => { 
-						if (info.length_seconds > 360) return api.sendMessage(getText('exceededLength', 'Video'), threadID, messageID);
+					return yt.getInfo(link).then(res => {
+						if (res.videoDetails.lengthSeconds > 600) return api.sendMessage(getText('exceededLength'), threadID, messageID);
+						else {
+							api.sendMessage(getText('processVA', 'Video'), threadID);
+							ytdl(link).pipe(fs.createWriteStream('audio.mp4')).on('close', () => api.sendMessage({ attachment: fs.createReadStream('audio.mp4') }, threadID, () => fs.unlinkSync('audio.mp4'), messageID));
+						}
 					});
-					api.sendMessage(getText('processVA', 'video'), threadID);
-					return ytdl(link).pipe(fs.createWriteStream(__dirname + "/src/video.mp4")).on("close", () => api.sendMessage({attachment: fs.createReadStream(__dirname + "/src/video.mp4")}, threadID, () => fs.unlinkSync(__dirname + "/src/video.mp4"), messageID));
 				}
 				case "media_audio": {
-					if (isNaN(body) || parseInt(body) <= 0 || parseInt(body) > 5) return api.sendMessage("chọn từ 1 đến 5", threadID);
+					if (isNaN(body) || parseInt(body) <= 0 || parseInt(body) > 5) return api.sendMessage(getText('chooseVA'), threadID);
 					var ytdl = require("ytdl-core");
-					var ffmpeg = require("fluent-ffmpeg");
-					var ffmpegPath = require('@ffmpeg-installer/ffmpeg').path;
-					ffmpeg.setFfmpegPath(ffmpegPath);
 					var link = `https://www.youtube.com/watch?v=${replyMessage.url[body -1]}`
-					ytdl.getInfo(link, (err, info) => { 
-						if (info.length_seconds > 360) return api.sendMessage(getText('exceededLength', 'Audio'), threadID, messageID);
+					return yt.getInfo(content).then(res => {
+						if (res.videoDetails.lengthSeconds > 600) return api.sendMessage(getText('exceededLength'), threadID, messageID);
+						else {
+							api.sendMessage(getText('processVA', 'Audio'), threadID);
+							ytdl(content, { filter: 'audioonly' }).pipe(fs.createWriteStream('audio.mp3')).on('close', () => api.sendMessage({ attachment: fs.createReadStream('audio.mp3') }, threadID, () => fs.unlinkSync('audio.mp3'), messageID));
+						}
 					});
-					api.sendMessage(getText('processVA', 'audio'), threadID);
-					return ffmpeg().input(ytdl(link)).toFormat("mp3").pipe(fs.createWriteStream(__dirname + "/src/music.mp3")).on("close", () => api.sendMessage({attachment: fs.createReadStream(__dirname + "/src/music.mp3")}, threadID, () => fs.unlinkSync(__dirname + "/src/music.mp3"), messageID));				}
-			}
+				}
 			return;
 		}
 	}

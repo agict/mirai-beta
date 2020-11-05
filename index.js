@@ -31,6 +31,8 @@ const __GLOBAL = new Object({
 		fishing: new Object(),
 		thread: new Object(),
 		user: new Object(),
+		nsfw: new Object(),
+		custom: new Object()
 	})
 });
 
@@ -39,19 +41,16 @@ var langFile = (fs.readFileSync(`./app/handle/src/langs/${process.env.LANGUAGE}.
 var langData = langFile.filter(item => item.indexOf('#') != 0 && item != '');
 for (let item of langData) {
 	let itemData = item.split('=');
-	let array = ['index.', 'listen.', 'event.', 'message.', 'reply.', 'unsend.', 'reaction.', 'login.', 'update.', 'fishing.', 'thread.', 'user.'];
 	let head = item.slice(0, item.indexOf('.') + 1);
-	if (array.includes(head)) {
-		let key = itemData[0].replace(head, '');
-		let value = itemData[1];
-		__GLOBAL.language[head.slice(0, -1)][key] = value;
-	}
+	let key = itemData[0].replace(head, '');
+	let value = itemData[1];
+	__GLOBAL.language[head.slice(0, -1)][key] = value;
 }
 
 function getText(...args) {
 	const langText = __GLOBAL.language.index;
 	const getKey = args[0];
-	if (!langText.hasOwnProperty(getKey)) throw `${__dirname} - Not found key language: ${getKey}`;
+	if (!langText.hasOwnProperty(getKey)) throw `${__filename} - Not found key language: ${getKey}`;
 	let text = langText[getKey].replace(/\\n/gi, '\n');
 	for (let i = 1; i < args.length; i++) {
 		let regEx = RegExp(`%${i}`, 'g');

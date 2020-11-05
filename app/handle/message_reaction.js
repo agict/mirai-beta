@@ -2,7 +2,7 @@ module.exports = function({ api, __GLOBAL, Economy, Fishing }) {
 	function getText(...args) {
 		const langText = __GLOBAL.language.reaction;
 		const getKey = args[0];
-		if (!langText.hasOwnProperty(getKey)) throw `${__dirname} - Not found key language: ${getKey}`;
+		if (!langText.hasOwnProperty(getKey)) throw `${__filename} - Not found key language: ${getKey}`;
 		let text = langText[getKey].replace(/\\n/gi, '\n');
 		for (let i = 1; i < args.length; i++) {
 			let regEx = RegExp(`%${i}`, 'g');
@@ -38,7 +38,7 @@ module.exports = function({ api, __GLOBAL, Economy, Fishing }) {
 						await Fishing.updateInventory(confirmMessage.author, inventory);
 						await Economy.addMoney(confirmMessage.author, money);
 					}
-					else api.sendMessage('🎣 | ' + getText('canceledSell'), threadID, messageID)
+					else api.sendMessage('🎣 | ' + getText('canceledSP'), threadID, messageID)
 					break;
 				}
 				case "fishing_upgradeRod": {
@@ -69,7 +69,7 @@ module.exports = function({ api, __GLOBAL, Economy, Fishing }) {
 					break;
 				}
 				case "fishing_buyRod": {
-					if (reaction !== '👍') return api.sendMessage('🎣 | ' + getText('canceledPurchase'), threadID);
+					if (reaction !== '👍') return api.sendMessage('🎣 | ' + getText('canceledSP'), threadID);
 					let moneydb = await Economy.getMoney(confirmMessage.author);
 					let inventory = await Fishing.getInventory(confirmMessage.author);
 					if (inventory.rod >= 1) return api.sendMessage('🎣 | ' + getText('alreadyHave'), threadID);

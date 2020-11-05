@@ -100,6 +100,7 @@ async function finish() {
 	console.log('-> Đang hoàn tất');
 	fs.removeSync('./tmp/newVersion');
 	fs.copySync('./.env.example', './.env');
+	fs.copySync('./tmp/handle/custom_message.js', './app/handle/custom_message.js');
 	console.log('>> Cập nhật hoàn tất <<');
 	console.log('>> Tất cả những dữ liệu quan trọng đã được sao lưu trong thư mục "tmp" <<');
 	if (!isGlitch) console.log('[!] Vì bạn đang không chạy bot trên Glitch, bạn sẽ cần phải tự khởi động bot [!]');

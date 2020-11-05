@@ -13,7 +13,7 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 	function getText(...args) {
 		const langText = {...__GLOBAL.language.message, ...__GLOBAL.language.fishing, ...__GLOBAL.language.thread, ...__GLOBAL.language.user};
 		const getKey = args[0];
-		if (!langText.hasOwnProperty(getKey)) throw `${__dirname} - Not found key language: ${getKey}`;
+		if (!langText.hasOwnProperty(getKey)) throw `${__filename} - Not found key language: ${getKey}`;
 		let text = langText[getKey].replace(/\\n/gi, '\n');
 		for (let i = 1; i < args.length; i++) {
 			let regEx = RegExp(`%${i}`, 'g');
@@ -477,9 +477,7 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 		if (contentMessage.indexOf(`${prefix}audio`) == 0) {
 			var content = (event.type == "message_reply") ? event.messageReply.body : contentMessage.slice(prefix.length + 6, contentMessage.length);
 			var ytdl = require("ytdl-core");
-			var ffmpeg = require("fluent-ffmpeg");
-			var ffmpegPath = require('@ffmpeg-installer/ffmpeg').path;
-			ffmpeg.setFfmpegPath(ffmpegPath);
+			if (!googleSearch) return api.sendMessage(getText('noAPIKey', 'Google Search'), threadID, messageID);
 			if (content.indexOf("http") == -1) {
 				return request(`https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=5&key=${googleSearch}&q=${encodeURIComponent(content)}`, function(err, response, body) {
 					var retrieve = JSON.parse(body), msg = '', num = 0, link = [];
@@ -494,15 +492,20 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 					api.sendMessage(getText('foundVA', link.length, msg), threadID, (err, info) => __GLOBAL.reply.push({ type: "media_audio", messageID: info.messageID, target: parseInt(threadID), author: senderID, url: link }));
 				});
 			}
-			ytdl.getInfo(content, (err, info) => (info.length_seconds > 360) ? api.sendMessage(getText('exceedLength', 'audio'), threadID, messageID) : '');
-			api.sendMessage(getText('processVA', 'Audio'), threadID);
-			return ffmpeg().input(ytdl(content)).toFormat("mp3").pipe(fs.createWriteStream(__dirname + "/src/music.mp3")).on("close", () => api.sendMessage({attachment: fs.createReadStream(__dirname + "/src/music.mp3")}, threadID, () => fs.unlinkSync(__dirname + "/src/music.mp3"), messageID));
+			return yt.getInfo(content).then(res => {
+				if (res.videoDetails.lengthSeconds > 600) return api.sendMessage(getText('exceededLength'), threadID, messageID);
+				else {
+					api.sendMessage(getText('processVA', 'Audio'), threadID);
+					ytdl(content, { filter: 'audioonly' }).pipe(fs.createWriteStream('audio.mp3')).on('close', () => api.sendMessage({ attachment: fs.createReadStream('audio.mp3') }, threadID, () => fs.unlinkSync('audio.mp3'), messageID));
+				}
+			});
 		}
 
 		//youtube video
 		if (contentMessage.indexOf(`${prefix}video`) == 0) {
 			var content = (event.type == "message_reply") ? event.messageReply.body : contentMessage.slice(prefix.length + 6, contentMessage.length);
 			var ytdl = require("ytdl-core");
+			if (!googleSearch) return api.sendMessage(getText('noAPIKey', 'Google Search'), threadID, messageID);
 			if (content.indexOf("http") == -1) {
 				return request(`https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=5&key=${googleSearch}&q=${encodeURIComponent(content)}`, function(err, response, body) {
 					var retrieve = JSON.parse(body), msg = '', num = 0, link = [];
@@ -517,9 +520,13 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 					api.sendMessage(getText('foundVA', link.length, msg), threadID, (err, info) => __GLOBAL.reply.push({ type: "media_video", messageID: info.messageID, target: parseInt(threadID), author: senderID, url: link }));
 				});
 			}
-			ytdl.getInfo(content, (err, info) => (info.length_seconds > 360) ? api.sendMessage(getText('exceededLength', 'video'), threadID, messageID) : '');
-			api.sendMessage(getText('processVA', 'Video'), threadID);
-			return ytdl(content).pipe(fs.createWriteStream(__dirname + "/src/video.mp4")).on("close", () => api.sendMessage({attachment: fs.createReadStream(__dirname + "/src/video.mp4")}, threadID, () => fs.unlinkSync(__dirname + "/src/video.mp4"), messageID));
+			return yt.getInfo(vID).then(res => {
+				if (res.videoDetails.lengthSeconds > 600) return api.sendMessage(getText('exceededLength'), threadID, messageID);
+				else {
+					api.sendMessage(getText('processVA', 'Video'), threadID);
+					ytdl(content).pipe(fs.createWriteStream('audio.mp4')).on('close', () => api.sendMessage({ attachment: fs.createReadStream('audio.mp4') }, threadID, () => fs.unlinkSync('audio.mp4'), messageID));
+				}
+			});
 		}
 
 		//anime
@@ -685,7 +692,7 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 			if (event.type != "message_reply") return api.sendMessage(getText('replyPic'), threadID, messageID);
 			if (event.messageReply.attachments.length > 1) return api.sendMessage(getText('onePicOnly'), threadID, messageID);
 			if (event.messageReply.attachments[0].type == 'photo') {
-				if (saucenao == '' || typeof saucenao == 'undefined') return api.sendMessage(getText('noAPIKeySauce'), threadID, messageID);
+				if (saucenao == '' || typeof saucenao == 'undefined') return api.sendMessage(getText('noAPIKey', 'Saucenao'), threadID, messageID);
 				return search(event.messageReply.attachments[0].url).then(response => {
 					let data = response[0];
 					let results = {
