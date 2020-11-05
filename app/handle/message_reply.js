@@ -364,7 +364,7 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Fishing }) {
 					if (isNaN(body) || parseInt(body) <= 0 || parseInt(body) > 5) return api.sendMessage(getText('chooseVA'), threadID);
 					const ytdl = require("ytdl-core");
 					var link = `https://www.youtube.com/watch?v=${replyMessage.url[body -1]}`
-					return yt.getInfo(link).then(res => {
+					return ytdl.getInfo(link).then(res => {
 						if (res.videoDetails.lengthSeconds > 600) return api.sendMessage(getText('exceededLength'), threadID, messageID);
 						else {
 							api.sendMessage(getText('processVA', 'Video'), threadID);
@@ -376,15 +376,15 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Fishing }) {
 					if (isNaN(body) || parseInt(body) <= 0 || parseInt(body) > 5) return api.sendMessage(getText('chooseVA'), threadID);
 					var ytdl = require("ytdl-core");
 					var link = `https://www.youtube.com/watch?v=${replyMessage.url[body -1]}`
-					return yt.getInfo(content).then(res => {
+					return ytdl.getInfo(link).then(res => {
 						if (res.videoDetails.lengthSeconds > 600) return api.sendMessage(getText('exceededLength'), threadID, messageID);
 						else {
 							api.sendMessage(getText('processVA', 'Audio'), threadID);
-							ytdl(content, { filter: 'audioonly' }).pipe(fs.createWriteStream('audio.mp3')).on('close', () => api.sendMessage({ attachment: fs.createReadStream('audio.mp3') }, threadID, () => fs.unlinkSync('audio.mp3'), messageID));
+							ytdl(link, { filter: 'audioonly' }).pipe(fs.createWriteStream('audio.mp3')).on('close', () => api.sendMessage({ attachment: fs.createReadStream('audio.mp3') }, threadID, () => fs.unlinkSync('audio.mp3'), messageID));
 						}
 					});
 				}
-			return;
+			}
 		}
 	}
 }
