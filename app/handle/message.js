@@ -159,24 +159,7 @@ module.exports = function ({ api, config, __GLOBAL, User, Thread, Rank, Economy,
 				else return api.sendMessage(getText('adminHelpInvalid', prefix), threadID, messageID);
 			}
 			else if (content.indexOf("settings") == 0) {
-				return api.sendMessage(//Will do this later
-					'🛠 | Đây là toàn bộ cài đặt của bot | 🛠\n' +
-					'\n=== Quản Lý Cài Đặt ===' +
-					'\n[1] Prefix.' +
-					'\n[2] Tên của bot.' +
-					'\n[3] Danh sách admins.' +
-					'\n[4] Ngôn ngữ.' +
-					'\n[5] Khởi động lại.' +
-					'\n=== Quản Lý Hoạt Động ===' +
-					'\n[6] Kiểm tra cập nhật.' +
-					'\n[7] Lấy danh sách các user bị ban.' +
-					'\n[8] Lấy danh sách các nhóm bị ban.' +
-					'\n[9] Gửi thông báo đến toàn bộ nhóm ' +
-					'\n[10] Tìm kiếm uid qua tên user.' +
-					'\n[11] Tìm kiếm threadID qua tên nhóm.' +
-					'\n[12] Áp dụng toàn bộ cài đặt.' +
-					'\n-> Để chọn bạn hãy reply tin nhắn này kèm với số bạn muốn <-',
-					threadID, (err, info) => {
+				return api.sendMessage(getText('adminSetting1') + getText('adminSetting2'), threadID, (err, info) => {
 						if (err) throw err;
 						__GLOBAL.reply.push({
 							type: "admin_settings",
