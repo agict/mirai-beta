@@ -1,8 +1,8 @@
 const logger = require("../modules/log.js");
-module.exports = function({ models }) {
+module.exports = function ({ models }) {
 	const Fishing = models.use("user");
 
-/* ==================== Last Time Fishing ==================== */
+	/* ==================== Last Time Fishing ==================== */
 
 	async function lastTimeFishing(uid) {
 		return (await Fishing.findOne({ where: { uid } })).get({ plain: true }).lastTimeFishing;
@@ -18,8 +18,8 @@ module.exports = function({ models }) {
 			return false;
 		}
 	}
-	
-/* ==================== Inventory ==================== */
+
+	/* ==================== Inventory ==================== */
 
 	async function getInventory(uid) {
 		return (await Fishing.findOne({ where: { uid } })).get({ plain: true }).inventory;
@@ -36,7 +36,7 @@ module.exports = function({ models }) {
 		}
 	}
 
-/* ==================== Stats ==================== */
+	/* ==================== Stats ==================== */
 
 	async function getStats(uid) {
 		return (await Fishing.findOne({ where: { uid } })).get({ plain: true }).stats;
@@ -53,7 +53,7 @@ module.exports = function({ models }) {
 		}
 	}
 
-/* =================== Steal fishing ==================== */
+	/* =================== Steal fishing ==================== */
 
 	async function getStealFishingTime(uid) {
 		return (await Fishing.findOne({ where: { uid } })).get({ plain: true }).stealfishtime;

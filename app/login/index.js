@@ -1,5 +1,5 @@
 const login = require("./login");
-module.exports = async function({ appState, __GLOBAL }, callback) {
+module.exports = async function ({ appState, __GLOBAL }, callback) {
 	function getText(...args) {
 		const langText = __GLOBAL.language.login;
 		const getKey = args[0];

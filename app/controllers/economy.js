@@ -1,8 +1,8 @@
 const logger = require("../modules/log.js");
-module.exports = function({ models }) {
+module.exports = function ({ models }) {
 	const Economy = models.use("user");
-	
-/* ==================== Daily ==================== */
+
+	/* ==================== Daily ==================== */
 
 	async function getDailyTime(uid) {
 		return (await Economy.findOne({ where: { uid } })).get({ plain: true }).dailytime;
@@ -75,9 +75,9 @@ module.exports = function({ models }) {
 			logger(err, 2);
 			return false;
 		}
-	}	
+	}
 
-/* =================== Steal ==================== */
+	/* =================== Steal ==================== */
 
 	async function getStealTime(uid) {
 		return (await Economy.findOne({ where: { uid } })).get({ plain: true }).stealtime;

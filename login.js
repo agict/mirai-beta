@@ -61,7 +61,7 @@ login(obj, option, (err, api) => {
 				console.error(getText('wrongAorP'));
 				break;
 			default:
-			console.error(err.error);
+				console.error(err.error);
 		}
 		return;
 	}
@@ -69,5 +69,5 @@ login(obj, option, (err, api) => {
 	var addNew = fs.createWriteStream(__dirname + "/appstate.json", { flags: "w" });
 	addNew.write(json);
 	console.log(getText('appstate'));
-	(process.env.API_SERVER_EXTERNAL == 'https://api.glitch.com') ? cmd.run('refresh') : cmd .run('pm2 reload 0');
+	(process.env.API_SERVER_EXTERNAL == 'https://api.glitch.com') ? cmd.run('refresh') : cmd.run('pm2 reload 0');
 });

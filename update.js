@@ -54,7 +54,7 @@ async function clean() {
 
 function clone() {
 	console.log('-> Đang tải bản cập nhật mới');
-	return new Promise(function(resolve, reject) {
+	return new Promise(function (resolve, reject) {
 		git().clone('https://github.com/roxtigger2003/mirai-beta', './tmp/newVersion', [], result => {
 			if (result != null) reject('[!] Không thể tải xuống bản cập nhật [!]');
 			resolve();
@@ -69,7 +69,7 @@ async function install() {
 }
 
 function modules() {
-	return new Promise(function(resolve, reject) {
+	return new Promise(function (resolve, reject) {
 		if (!isGlitch) {
 			console.log('-> Đang cài đặt modules');
 			let child = exec('npm install');
@@ -91,7 +91,7 @@ function modules() {
 }
 
 async function finish() {
-	let checkDB = (await axios.get('https://raw.githubusercontent.com/roxtigger2003/mirai-beta/master/package.json')).data.newDB;
+	let checkDB = (await axios.get('https://raw.githubusercontent.com/catalizcs/mirai-beta/master/package.json')).data.newDB;
 	if (checkDB) console.log('>> Database cần phải thay đổi, bạn sẽ không thể sử dụng được database cũ <<');
 	else {
 		console.log('>> Database không cần phải thay đổi, bạn có thể tiếp tục sử dụng database cũ <<');
@@ -102,7 +102,7 @@ async function finish() {
 	fs.copySync('./.env.example', './.env');
 	fs.copySync('./tmp/handle/custom_message.js', './app/handle/custom_message.js');
 	console.log('>> Cập nhật hoàn tất <<');
-	console.log('>> Tất cả những dữ liệu quan trọng đã được sao lưu trong thư mục "tmp" <<');
+	console.log('>> TẤT CẢ NHỮNG DỮ LIỆU QUAN TRỌNG ĐÃ ĐƯỢC SAO LƯU VÀO THƯ MỤC "tmp" <<');
 	if (!isGlitch) console.log('[!] Vì bạn đang không chạy bot trên Glitch, bạn sẽ cần phải tự khởi động bot [!]');
 	else cmd.run('refresh');
 }

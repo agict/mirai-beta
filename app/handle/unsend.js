@@ -1,4 +1,4 @@
-module.exports = function({ api, __GLOBAL, User }) {
+module.exports = function ({ api, __GLOBAL, User }) {
 	function getText(...args) {
 		const langText = __GLOBAL.language.unsend;
 		const getKey = args[0];
@@ -11,7 +11,7 @@ module.exports = function({ api, __GLOBAL, User }) {
 		return text;
 	}
 
-	return async function({ event }) {
+	return async function ({ event }) {
 		if (__GLOBAL.resendBlocked.includes(parseInt(event.threadID))) return;
 		if (!__GLOBAL.messages.some(item => item.msgID == event.messageID)) return;
 		var getMsg = __GLOBAL.messages.find(item => item.msgID == event.messageID);

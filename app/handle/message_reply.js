@@ -1,6 +1,6 @@
 const fs = require("fs-extra");
 function writeENV(tag, input) {
-	return fs.readFile('./.env', { encoding: 'utf-8' }, function(err, data) {
+	return fs.readFile('./.env', { encoding: 'utf-8' }, function (err, data) {
 		if (err) throw err;
 		data = data.split('\n');
 		let lastIndex = -1;
@@ -16,9 +16,9 @@ function writeENV(tag, input) {
 	});
 }
 
-module.exports = function({ api, config, __GLOBAL, User, Thread, Fishing }) {	
+module.exports = function ({ api, config, __GLOBAL, User, Thread, Fishing }) {
 	function getText(...args) {
-		const langText = {...__GLOBAL.language.reply, ...__GLOBAL.language.fishing};
+		const langText = { ...__GLOBAL.language.reply, ...__GLOBAL.language.fishing };
 		const getKey = args[0];
 		if (!langText.hasOwnProperty(getKey)) throw `${__filename} - Not found key language: ${getKey}`;
 		let text = langText[getKey].replace(/\\n/gi, '\n');
@@ -29,7 +29,7 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Fishing }) {
 		return text;
 	}
 
-	return async function({ event }) {
+	return async function ({ event }) {
 		const cmd = require("node-cmd");
 		const axios = require('axios');
 		const { reply } = __GLOBAL;
@@ -102,7 +102,7 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Fishing }) {
 					}
 					else if (body == '6') {
 						const semver = require('semver');
-						axios.get('https://raw.githubusercontent.com/roxtigger2003/mirai-beta/master/package.json').then((res) => {
+						axios.get('https://raw.githubusercontent.com/catalizcs/mirai-beta/master/package.json').then((res) => {
 							var local = JSON.parse(fs.readFileSync('./package.json')).version;
 							if (semver.lt(local, res.data.version)) {
 								api.sendMessage(getText('newUpdate'), threadID);
@@ -112,13 +112,13 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Fishing }) {
 						}).catch(() => api.sendMessage(getText('cantCheckUpdate'), threadID));
 					}
 					else if (body == '7') {
-						var data = await User.getUsers(['name', 'uid'], {block: true});
+						var data = await User.getUsers(['name', 'uid'], { block: true });
 						var userBlockMsg = "";
 						data.forEach(user => userBlockMsg += `\n${user.name} - ${user.uid}`);
 						api.sendMessage('🛠 | ' + ((userBlockMsg) ? getText('bannedUsers', userBlockMsg) : getText('noBannedUser')), threadID, messageID);
 					}
 					else if (body == '8') {
-						var data = await Thread.getThreads(['name', 'threadID'], {block: true});
+						var data = await Thread.getThreads(['name', 'threadID'], { block: true });
 						var threadBlockMsg = "";
 						data.forEach(thread => threadBlockMsg += `\n${thread.name} - ${thread.threadID}`);
 						api.sendMessage('🛠 | ' + ((threadBlockMsg) ? getText('bannedThreads', threadBlockMsg) : getText('noBannedThread')), threadID, messageID);
@@ -157,7 +157,7 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Fishing }) {
 						});
 					}
 					else if (body == '12') api.sendMessage('🛠 | ' + getText('restart'), threadID, () => cmd.run(restart));
- 					else api.sendMessage(getText('soHigh'), threadID);
+					else api.sendMessage(getText('soHigh'), threadID);
 					break;
 				}
 				case "admin_prefix": {
@@ -238,9 +238,9 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Fishing }) {
 				}
 				case "fishing_shop": {
 					let inventory = await Fishing.getInventory(senderID);
-					let durability = ['50','70','100','130','200','400'];
-					let moneyToUpgrade = ['1000','4000','6000','8000','10000'];
-					let expToLevelup = ['1000','2000','4000','6000','8000'];
+					let durability = ['50', '70', '100', '130', '200', '400'];
+					let moneyToUpgrade = ['1000', '4000', '6000', '8000', '10000'];
+					let expToLevelup = ['1000', '2000', '4000', '6000', '8000'];
 					let moneyToFix = Math.floor(Math.random() * (300 - 100)) + 100;
 					if (body == 1) return api.sendMessage(getText('upgradeRod', expToLevelup[inventory.rod], moneyToUpgrade[inventory.rod], inventory.rod + 1), threadID, (err, info) => __GLOBAL.confirm.push({ type: "fishing_upgradeRod", messageID: info.messageID, author: senderID, exp: expToLevelup[inventory.rod], money: moneyToUpgrade[inventory.rod], durability: durability[inventory.rod] }));
 					if (body == 2) return api.sendMessage(getText('fixRod', moneyToFix), threadID, (err, info) => __GLOBAL.confirm.push({ type: "fishing_fixRod", messageID: info.messageID, author: senderID, moneyToFix, durability: durability[inventory.rod - 1] }));
@@ -259,7 +259,7 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Fishing }) {
 					inventory.exp += Math.floor(Math.random() * 500);
 					stats.exp += Math.floor(Math.random() * 500);
 					stats.casts += 1;
-					if (event.timestamp - timeout >= 0 || parseInt(body) !==  parseInt(replyMessage.answer)) {
+					if (event.timestamp - timeout >= 0 || parseInt(body) !== parseInt(replyMessage.answer)) {
 						if (roll <= 400) {
 							if (inventory.trashes - valueSteal <= 0) valueSteal = inventory.trashes;
 							inventory.trashes -= valueSteal;
@@ -310,7 +310,7 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Fishing }) {
 							inventory.sharks -= valueSteal;
 							typeSteal = getText('sharks');
 						}
-						api.sendMessage((event.timestamp - timeout >= 0) ? getText('outOfTime2', valueSteal, typeSteal) :  getText('wrongAnsFish', valueSteal, typeSteal), threadID);
+						api.sendMessage((event.timestamp - timeout >= 0) ? getText('outOfTime2', valueSteal, typeSteal) : getText('wrongAnsFish', valueSteal, typeSteal), threadID);
 					}
 					if (parseInt(body) == parseInt(replyMessage.answer)) {
 						if (roll <= 400) {
@@ -363,24 +363,24 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Fishing }) {
 				case "media_video": {
 					if (isNaN(body) || parseInt(body) <= 0 || parseInt(body) > 5) return api.sendMessage(getText('chooseVA'), threadID);
 					const ytdl = require("ytdl-core");
-					var link = `https://www.youtube.com/watch?v=${replyMessage.url[body -1]}`
+					var link = `https://www.youtube.com/watch?v=${replyMessage.url[body - 1]}`
 					return ytdl.getInfo(link).then(res => {
 						if (res.videoDetails.lengthSeconds > 600) return api.sendMessage(getText('exceededLength'), threadID, messageID);
 						else {
 							api.sendMessage(getText('processVA', 'Video'), threadID);
-							ytdl(link).pipe(fs.createWriteStream('audio.mp4')).on('close', () => api.sendMessage({ attachment: fs.createReadStream('audio.mp4') }, threadID, () => fs.unlinkSync('audio.mp4'), messageID));
+							ytdl(link).pipe(fs.createWriteStream(__dirname + '/src/video.mp4')).on('close', () => api.sendMessage({ attachment: fs.createReadStream(__dirname + '/src/video.mp4') }, threadID, () => fs.unlinkSync(__dirname + '/src/video.mp4'), messageID));
 						}
 					});
 				}
 				case "media_audio": {
 					if (isNaN(body) || parseInt(body) <= 0 || parseInt(body) > 5) return api.sendMessage(getText('chooseVA'), threadID);
 					var ytdl = require("ytdl-core");
-					var link = `https://www.youtube.com/watch?v=${replyMessage.url[body -1]}`
+					var link = `https://www.youtube.com/watch?v=${replyMessage.url[body - 1]}`
 					return ytdl.getInfo(link).then(res => {
 						if (res.videoDetails.lengthSeconds > 600) return api.sendMessage(getText('exceededLength'), threadID, messageID);
 						else {
 							api.sendMessage(getText('processVA', 'Audio'), threadID);
-							ytdl(link, { filter: 'audioonly' }).pipe(fs.createWriteStream('audio.mp3')).on('close', () => api.sendMessage({ attachment: fs.createReadStream('audio.mp3') }, threadID, () => fs.unlinkSync('audio.mp3'), messageID));
+							ytdl(link, { filter: 'audioonly' }).pipe(fs.createWriteStream(__dirname + '/src/audio.mp3')).on('close', () => api.sendMessage({ attachment: fs.createReadStream(__dirname + '/src/audio.mp3') }, threadID, () => fs.unlinkSync(__dirname + '/src/audio.mp3'), messageID));
 						}
 					});
 				}

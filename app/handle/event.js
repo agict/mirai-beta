@@ -1,4 +1,4 @@
-module.exports = function({ api, config, __GLOBAL, User, Thread }) {
+module.exports = function ({ api, config, __GLOBAL, User, Thread }) {
 	function getText(...args) {
 		const langText = __GLOBAL.language.event;
 		const getKey = args[0];
@@ -11,7 +11,7 @@ module.exports = function({ api, config, __GLOBAL, User, Thread }) {
 		return text;
 	}
 
-	return async function({ event }) {
+	return async function ({ event }) {
 		let threadInfo = await api.getThreadInfo(event.threadID);
 		let threadName = threadInfo.threadName;
 		switch (event.logMessageType) {

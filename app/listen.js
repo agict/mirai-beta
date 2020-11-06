@@ -1,6 +1,6 @@
 const logger = require("./modules/log.js");
 const config = require("../config");
-module.exports = function({ api, models, __GLOBAL }) {
+module.exports = function ({ api, models, __GLOBAL }) {
 	function getText(...args) {
 		const langText = __GLOBAL.language.listen;
 		const getKey = args[0];
@@ -13,13 +13,13 @@ module.exports = function({ api, models, __GLOBAL }) {
 		return text;
 	}
 
-	const User = require("./controllers/user")({ models, api, __GLOBAL }),
-				Thread = require("./controllers/thread")({ models, api, __GLOBAL }),
-				Rank = require("./controllers/rank")({ models, api }),
-				Economy = require("./controllers/economy")({ models, api }),
-				Fishing = require("./controllers/fishing")({ models, api }),
-				Nsfw = require("./controllers/nsfw")({ models, api, Economy, __GLOBAL }),
-				Image = require("./modules/image");
+	const User = require("./controllers/user")({ models, api, __GLOBAL });
+	const Thread = require("./controllers/thread")({ models, api, __GLOBAL });
+	const Rank = require("./controllers/rank")({ models, api });
+	const Economy = require("./controllers/economy")({ models, api });
+	const Fishing = require("./controllers/fishing")({ models, api });
+	const Nsfw = require("./controllers/nsfw")({ models, api, Economy, __GLOBAL });
+	const Image = require("./modules/image");
 
 	(async () => {
 		logger(getText('startEnv'));
@@ -43,7 +43,7 @@ module.exports = function({ api, models, __GLOBAL }) {
 	logger(`${api.getCurrentUserID()} - ${config.botName}`, "[ UID ]");
 	logger(getText('startListen'));
 
-	return function(error, event) {
+	return function (error, event) {
 		if (error) return logger(error, 2);
 		switch (event.type) {
 			case "message":

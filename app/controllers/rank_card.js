@@ -11,7 +11,7 @@ const __root = path.resolve(__dirname, "../material");
 const Canvas = require("canvas");
 const jimp = require('jimp');
 
-module.exports = async function(data) {
+module.exports = async function (data) {
 	const { id, name, rank, level, expCurrent, expNextLevel } = data;
 
 	Canvas.registerFont(__root + "/fonts/regular-font.ttf", {
@@ -31,10 +31,10 @@ module.exports = async function(data) {
 	let avatar = __root + `/rank_card/avt_${id}.png`;
 	let getAvatar = (await axios.get(`https://graph.facebook.com/${id}/picture?width=512&height=512`, { responseType: 'arraybuffer' })).data;
 	fs.writeFileSync(avatar, Buffer.from(getAvatar, 'utf-8'));
-	
+
 	const canvas = Canvas.createCanvas(934, 282);
 	const ctx = canvas.getContext("2d");
-	
+
 	ctx.drawImage(rankCard, 0, 0, canvas.width, canvas.height);
 	ctx.drawImage(await Canvas.loadImage(await circle(avatar)), 45, 50, 180, 180);
 

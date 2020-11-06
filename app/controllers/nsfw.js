@@ -1,5 +1,5 @@
 const logger = require("../modules/log.js");
-module.exports = function({ models, Economy }) {
+module.exports = function ({ models, Economy }) {
 	const Nsfw = models.use("user");
 
 	function getText(...args) {
@@ -12,7 +12,7 @@ module.exports = function({ models, Economy }) {
 	}
 
 	/* ==================== NSFW ==================== */
-	
+
 	async function getNSFW(uid) {
 		return (await Nsfw.findOne({ where: { uid } })).get({ plain: true }).nsfwTier;
 	}
@@ -86,7 +86,7 @@ module.exports = function({ models, Economy }) {
 			Nsfw.update({ hentaiLeft: 2, pornLeft: 1 }, { where: { nsfwTier: 0 } });
 			Nsfw.update({ hentaiLeft: 4, pornLeft: 2 }, { where: { nsfwTier: 1 } });
 			Nsfw.update({ hentaiLeft: 8, pornLeft: 4 }, { where: { nsfwTier: 2 } });
-			Nsfw.update({ hentaiLeft: 12, pornLeft: 6 },  {where: { nsfwTier: 3 } });
+			Nsfw.update({ hentaiLeft: 12, pornLeft: 6 }, { where: { nsfwTier: 3 } });
 			Nsfw.update({ hentaiLeft: 16, pornLeft: 8 }, { where: { nsfwTier: 4 } });
 			Nsfw.update({ hentaiLeft: -1, pornLeft: 10 }, { where: { nsfwTier: 5 } });
 			return true;

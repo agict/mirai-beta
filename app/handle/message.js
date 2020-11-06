@@ -1,6 +1,6 @@
-module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, Fishing, Nsfw, Image }) {
+module.exports = function ({ api, config, __GLOBAL, User, Thread, Rank, Economy, Fishing, Nsfw, Image }) {
 	/* ================ Config ==================== */
-	let {prefix, googleSearch, wolfarm, openweather, tenor, saucenao, admins, nsfwGodMode} = config;
+	let { prefix, googleSearch, wolfarm, openweather, tenor, saucenao, admins, nsfwGodMode } = config;
 	const fs = require("fs-extra");
 	const moment = require("moment-timezone");
 	const request = require("request");
@@ -9,9 +9,9 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 	const axios = require('axios');
 	const logger = require("../modules/log.js");
 	var resetNSFW = false;
-	
+
 	function getText(...args) {
-		const langText = {...__GLOBAL.language.message, ...__GLOBAL.language.fishing, ...__GLOBAL.language.thread, ...__GLOBAL.language.user};
+		const langText = { ...__GLOBAL.language.message, ...__GLOBAL.language.fishing, ...__GLOBAL.language.thread, ...__GLOBAL.language.user };
 		const getKey = args[0];
 		if (!langText.hasOwnProperty(getKey)) throw `${__filename} - Not found key language: ${getKey}`;
 		let text = langText[getKey].replace(/\\n/gi, '\n');
@@ -38,12 +38,17 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 		logger('Tạo file shortcut mới thành công!');
 	}
 
-	return async function({ event }) {
+	return async function ({ event }) {
 		let { body: contentMessage, senderID, threadID, messageID } = event;
 		senderID = parseInt(senderID);
 		threadID = parseInt(threadID);
 
 		if (__GLOBAL.userBlocked.includes(senderID) && !admins.includes(senderID) || __GLOBAL.threadBlocked.includes(threadID) && !admins.includes(senderID)) return;
+
+		__GLOBAL.messages.push({
+			msgID: messageID,
+			msgBody: contentMessage
+		});
 
 		await User.createUser(senderID);
 		await Thread.createThread(threadID);
@@ -66,16 +71,15 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 			await User.updateReason(senderID, "");
 			__GLOBAL.afkUser.splice(__GLOBAL.afkUser.indexOf(senderID), 1);
 			var name = await User.getName(senderID);
-			return api.sendMessage(getText('welcomeBack', name),threadID);
+			return api.sendMessage(getText('welcomeBack', name), threadID);
 		}
 
-	/* ================ Staff Commands ==================== */
+		/* ================ Staff Commands ==================== */
 		//lấy shortcut
 		if (contentMessage.length !== -1) {
 			let shortcut = JSON.parse(fs.readFileSync(__dirname + "/src/shortcut.json"));
 			if (shortcut.some(item => item.id == threadID)) {
 				let getThread = shortcut.find(item => item.id == threadID).shorts;
-				let output, random;
 				if (getThread.some(item => item.in == contentMessage)) {
 					let shortOut = getThread.find(item => item.in == contentMessage).out;
 					if (shortOut.indexOf(" | ") !== -1) {
@@ -88,12 +92,12 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 		}
 
 		//sim on/off
-		if (__GLOBAL.simOn.includes(threadID)) request(`https://simsumi.herokuapp.com/api?text=${encodeURIComponent(contentMessage)}&lang=vi`, (err, response, body) => api.sendMessage((JSON.parse(body).success != '') ? JSON.parse(body).success : getText('noAnswer'), threadID, messageID)); 
+		if (__GLOBAL.simOn.includes(threadID)) request(`https://simsumi.herokuapp.com/api?text=${encodeURIComponent(contentMessage)}&lang=vi`, (err, response, body) => api.sendMessage((JSON.parse(body).success != '') ? JSON.parse(body).success : getText('noAnswer'), threadID, messageID));
 
-		//lấy file cmds
+		//Get cmds.json
 		var nocmdData = JSON.parse(fs.readFileSync(__dirname + "/src/cmds.json"));
 
-		//tạo 1 đối tượng mới nếu group chưa có trong file cmds
+		//create new object contains banned cmds+threads
 		if (!nocmdData.banned.some(item => item.id == threadID)) {
 			let addThread = {
 				id: threadID,
@@ -103,11 +107,11 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 			fs.writeFileSync(__dirname + "/src/cmds.json", JSON.stringify(nocmdData));
 		}
 
-		//lấy lệnh bị cấm trong group
+		//get banned cmds
 		var cmds = nocmdData.banned.find(item => item.id == threadID).cmds;
 		for (const item of cmds) if (contentMessage.indexOf(prefix + item) == 0) return api.sendMessage(getText('bannedCommand'), threadID, messageID);
 
-		//giúp thành viên thông báo lỗi về admin
+		//report
 		if (contentMessage.indexOf(`${prefix}report`) == 0) {
 			var content = contentMessage.slice(prefix.length + 7, contentMessage.length);
 			if (!content) return api.sendMessage(getText('noErrorInfo'), threadID, messageID);
@@ -289,7 +293,7 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 			else if (content.indexOf("banCmd") == 0) {
 				if (!arg) return api.sendMessage(getText('enterBanCmd'), threadID, messageID);
 				var jsonData = JSON.parse(fs.readFileSync(__dirname + "/src/cmds.json"));
-				if (arg == "list") return api.sendMessage(getText('listBannedCmd',nocmdData.banned.find(item => item.id == threadID).cmds), threadID, messageID);
+				if (arg == "list") return api.sendMessage(getText('listBannedCmd', nocmdData.banned.find(item => item.id == threadID).cmds), threadID, messageID);
 				if (!jsonData.cmds.includes(arg)) return api.sendMessage(getText('cantFindCmd', arg), threadID, messageID);
 				else {
 					if (jsonData.banned.some(item => item.id == threadID)) {
@@ -380,7 +384,7 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 			}
 		}
 
-	/* ==================== Help Commands ================*/
+		/* ==================== Help Commands ================*/
 
 		//help
 		if (contentMessage.indexOf(`${prefix}help`) == 0) {
@@ -402,10 +406,10 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 
 		//yêu cầu công việc cho bot
 		if (contentMessage.indexOf(`${prefix}request`) == 0) {
-			var content = contentMessage.slice(prefix.length + 8,contentMessage.length);
+			var content = contentMessage.slice(prefix.length + 8, contentMessage.length);
 			if (!fs.existsSync(__dirname + "/src/requestList.json")) {
 				let requestList = [];
-				fs.writeFileSync(__dirname + "/src/requestList.json",JSON.stringify(requestList));
+				fs.writeFileSync(__dirname + "/src/requestList.json", JSON.stringify(requestList));
 			}
 			if (content.indexOf("add") == 0) {
 				var addnew = content.slice(4, content.length);
@@ -435,7 +439,7 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 			}
 		}
 
-	/* ==================== Cipher Commands ================*/
+		/* ==================== Cipher Commands ================*/
 
 		//morse
 		if (contentMessage.indexOf(`${prefix}morse`) == 0) {
@@ -450,8 +454,8 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 			if (process.env.CAESAR == '' || process.env.CAESAR == null) return api.sendMessage(getText('pwdNotFound', 'CAESAR'), threadID, messageID);
 			const Caesar = require('caesar-salad').Caesar;
 			var content = contentMessage.slice(prefix.length + 7, contentMessage.length);
-			if (event.type == "message_reply")(content.indexOf('encode') == 0) ? api.sendMessage(Caesar.Cipher(process.env.CAESAR).crypt(event.messageReply.body), threadID, messageID) : (content.indexOf('decode') == 0) ? api.sendMessage(Caesar.Decipher(process.env.CAESAR).crypt(event.messageReply.body), threadID, messageID) : api.sendMessage(getText('incorrectSyntax', prefix, 'caesar'), threadID, messageID);
-			else(content.indexOf('encode') == 0) ? api.sendMessage(Caesar.Cipher(process.env.CAESAR).crypt(content.slice(3, contentMessage.length)), threadID, messageID) : (content.indexOf('decode') == 0) ? api.sendMessage(Caesar.Decipher(process.env.CAESAR).crypt(content.slice(3, contentMessage.length)), threadID, messageID) : api.sendMessage(getText('incorrectSyntax', prefix, 'caesar'), threadID, messageID);
+			if (event.type == "message_reply") (content.indexOf('encode') == 0) ? api.sendMessage(Caesar.Cipher(process.env.CAESAR).crypt(event.messageReply.body), threadID, messageID) : (content.indexOf('decode') == 0) ? api.sendMessage(Caesar.Decipher(process.env.CAESAR).crypt(event.messageReply.body), threadID, messageID) : api.sendMessage(getText('incorrectSyntax', prefix, 'caesar'), threadID, messageID);
+			else (content.indexOf('encode') == 0) ? api.sendMessage(Caesar.Cipher(process.env.CAESAR).crypt(content.slice(3, contentMessage.length)), threadID, messageID) : (content.indexOf('decode') == 0) ? api.sendMessage(Caesar.Decipher(process.env.CAESAR).crypt(content.slice(3, contentMessage.length)), threadID, messageID) : api.sendMessage(getText('incorrectSyntax', prefix, 'caesar'), threadID, messageID);
 		}
 
 		//vigenere
@@ -459,8 +463,8 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 			if (process.env.VIGENERE == '' || process.env.VIGENERE == null) return api.sendMessage(getText('pwdNotFound', 'VIGENERE'), threadID, messageID);
 			const Vigenere = require('caesar-salad').Vigenere;
 			var content = contentMessage.slice(prefix.length + 9, contentMessage.length);
-			if (event.type == "message_reply")(content.indexOf('en') == 0) ? api.sendMessage(Vigenere.Cipher(process.env.VIGENERE).crypt(event.messageReply.body), threadID, messageID) : (content.indexOf('de') == 0) ? api.sendMessage(Vigenere.Decipher(process.env.VIGENERE).crypt(event.messageReply.body), threadID, messageID) : api.sendMessage(getText('incorrectSyntax', prefix, 'vigenere'), threadID, messageID)
-			else(content.indexOf('en') == 0) ? api.sendMessage(Vigenere.Cipher(process.env.VIGENERE).crypt(content.slice(3, contentMessage.length)), threadID, messageID) : (content.indexOf('de') == 0) ? api.sendMessage(Vigenere.Decipher(process.env.VIGENERE).crypt(content.slice(3, contentMessage.length)), threadID, messageID) : api.sendMessage(getText('incorrectSyntax', prefix, 'vigenere'), threadID, messageID);
+			if (event.type == "message_reply") (content.indexOf('en') == 0) ? api.sendMessage(Vigenere.Cipher(process.env.VIGENERE).crypt(event.messageReply.body), threadID, messageID) : (content.indexOf('de') == 0) ? api.sendMessage(Vigenere.Decipher(process.env.VIGENERE).crypt(event.messageReply.body), threadID, messageID) : api.sendMessage(getText('incorrectSyntax', prefix, 'vigenere'), threadID, messageID)
+			else (content.indexOf('en') == 0) ? api.sendMessage(Vigenere.Cipher(process.env.VIGENERE).crypt(content.slice(3, contentMessage.length)), threadID, messageID) : (content.indexOf('de') == 0) ? api.sendMessage(Vigenere.Decipher(process.env.VIGENERE).crypt(content.slice(3, contentMessage.length)), threadID, messageID) : api.sendMessage(getText('incorrectSyntax', prefix, 'vigenere'), threadID, messageID);
 		}
 
 		//rot47
@@ -471,7 +475,7 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 			else (content.indexOf('en') == 0) ? api.sendMessage(ROT47.Cipher().crypt(content.slice(3, contentMessage.length)), threadID, messageID) : (content.indexOf('de') == 0) ? api.sendMessage(ROT47.Decipher().crypt(content.slice(3, contentMessage.length)), threadID, messageID) : api.sendMessage(`Sai cú pháp, vui lòng tìm hiểu thêm tại ${prefix}help rot47`, threadID, messageID);
 		}
 
-	/* ==================== Media Commands ==================== */
+		/* ==================== Media Commands ==================== */
 
 		//youtube music
 		if (contentMessage.indexOf(`${prefix}audio`) == 0) {
@@ -479,7 +483,7 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 			var ytdl = require("ytdl-core");
 			if (!googleSearch) return api.sendMessage(getText('noAPIKey', 'Google Search'), threadID, messageID);
 			if (content.indexOf("http") == -1) {
-				return request(`https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=5&key=${googleSearch}&q=${encodeURIComponent(content)}`, function(err, response, body) {
+				return request(`https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=5&key=${googleSearch}&q=${encodeURIComponent(content)}`, function (err, response, body) {
 					var retrieve = JSON.parse(body), msg = '', num = 0, link = [];
 					if (!retrieve) return api.sendMessage(getText('dieAPI'), threadID);
 					if (retrieve.items.length < 1) return api.sendMessage(getText('noVA'), threadID, messageID);
@@ -492,11 +496,11 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 					api.sendMessage(getText('foundVA', link.length, msg), threadID, (err, info) => __GLOBAL.reply.push({ type: "media_audio", messageID: info.messageID, target: parseInt(threadID), author: senderID, url: link }));
 				});
 			}
-			return yt.getInfo(content).then(res => {
+			return ytdl.getInfo(content).then(res => {
 				if (res.videoDetails.lengthSeconds > 600) return api.sendMessage(getText('exceededLength'), threadID, messageID);
 				else {
 					api.sendMessage(getText('processVA', 'Audio'), threadID);
-					ytdl(content, { filter: 'audioonly' }).pipe(fs.createWriteStream('audio.mp3')).on('close', () => api.sendMessage({ attachment: fs.createReadStream('audio.mp3') }, threadID, () => fs.unlinkSync('audio.mp3'), messageID));
+					ytdl(content, { filter: 'audioonly' }).pipe(fs.createWriteStream(__dirname + '/src/audio.mp3')).on('close', () => api.sendMessage({ attachment: fs.createReadStream(__dirname + '/src/audio.mp3') }, threadID, () => fs.unlinkSync(__dirname + '/src/audio.mp3'), messageID));
 				}
 			});
 		}
@@ -507,7 +511,7 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 			var ytdl = require("ytdl-core");
 			if (!googleSearch) return api.sendMessage(getText('noAPIKey', 'Google Search'), threadID, messageID);
 			if (content.indexOf("http") == -1) {
-				return request(`https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=5&key=${googleSearch}&q=${encodeURIComponent(content)}`, function(err, response, body) {
+				return request(`https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=5&key=${googleSearch}&q=${encodeURIComponent(content)}`, function (err, response, body) {
 					var retrieve = JSON.parse(body), msg = '', num = 0, link = [];
 					if (!retrieve) return api.sendMessage(getText('dieAPI'), threadID);
 					if (retrieve.items < 1) return api.sendMessage(getText('noVA'), threadID, messageID);
@@ -520,11 +524,11 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 					api.sendMessage(getText('foundVA', link.length, msg), threadID, (err, info) => __GLOBAL.reply.push({ type: "media_video", messageID: info.messageID, target: parseInt(threadID), author: senderID, url: link }));
 				});
 			}
-			return yt.getInfo(vID).then(res => {
+			return ytdl.getInfo(content).then(res => {
 				if (res.videoDetails.lengthSeconds > 600) return api.sendMessage(getText('exceededLength'), threadID, messageID);
 				else {
 					api.sendMessage(getText('processVA', 'Video'), threadID);
-					ytdl(content).pipe(fs.createWriteStream('audio.mp4')).on('close', () => api.sendMessage({ attachment: fs.createReadStream('audio.mp4') }, threadID, () => fs.unlinkSync('audio.mp4'), messageID));
+					ytdl(content).pipe(fs.createWriteStream(__dirname + '/src/video.mp4')).on('close', () => api.sendMessage({ attachment: fs.createReadStream(__dirname + '/src/video.mp4') }, threadID, () => fs.unlinkSync(__dirname + '/src/video.mp4'), messageID));
 				}
 			});
 		}
@@ -545,7 +549,7 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 				let getURL = "";
 				(!picData.data) ? getURL = picData.url : getURL = picData.data.response.url;
 				let ext = getURL.substring(getURL.lastIndexOf(".") + 1);
-				request(getURL).pipe(fs.createWriteStream(__dirname + `/src/anime.${ext}`)).on("close", () => api.sendMessage({attachment: fs.createReadStream(__dirname + `/src/anime.${ext}`)}, threadID, () => fs.unlinkSync(__dirname + `/src/anime.${ext}`), messageID));
+				request(getURL).pipe(fs.createWriteStream(__dirname + `/src/anime.${ext}`)).on("close", () => api.sendMessage({ attachment: fs.createReadStream(__dirname + `/src/anime.${ext}`) }, threadID, () => fs.unlinkSync(__dirname + `/src/anime.${ext}`), messageID));
 			});
 		}
 
@@ -556,7 +560,7 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 				var content = JSON.parse(body);
 				let title = content.title;
 				var baseurl = content.url;
-				let callback = function() {
+				let callback = function () {
 					api.sendMessage({
 						body: `${title}`,
 						attachment: fs.createReadStream(__dirname + "/src/meme.jpg")
@@ -568,13 +572,13 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 		//gif
 		if (contentMessage.indexOf(`${prefix}gif`) == 0) {
 			var content = contentMessage.slice(prefix.length + 4, contentMessage.length);
-			if (content.length == -1) return api.sendMessage(`Bạn đã nhập sai format, vui lòng ${prefix}help gif để biết thêm chi tiết!`, threadID, messageID);
+			if (content.length == -1) return api.sendMessage(getText('incorrectSyntax', prefix, 'gif'), threadID, messageID);
 			if (content.indexOf(`cat`) !== -1) {
 				return request(`https://api.tenor.com/v1/random?key=${tenor}&q=cat&limit=1`, (err, response, body) => {
 					if (err) throw err;
 					var string = JSON.parse(body);
 					var stringURL = string.results[0].media[0].tinygif.url;
-					request(stringURL).pipe(fs.createWriteStream(__dirname + `/src/randompic.gif`)).on("close", () => api.sendMessage({attachment: fs.createReadStream(__dirname + "/src/randompic.gif")}, threadID, () => fs.unlinkSync(__dirname + "/src/randompic.gif"), messageID));
+					request(stringURL).pipe(fs.createWriteStream(__dirname + `/src/randompic.gif`)).on("close", () => api.sendMessage({ attachment: fs.createReadStream(__dirname + "/src/randompic.gif") }, threadID, () => fs.unlinkSync(__dirname + "/src/randompic.gif"), messageID));
 				});
 			}
 			else if (content.indexOf(`dog`) == 0) {
@@ -582,7 +586,7 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 					if (err) throw err;
 					var string = JSON.parse(body);
 					var stringURL = string.results[0].media[0].tinygif.url;
-					request(stringURL).pipe(fs.createWriteStream(__dirname + "/src/randompic.gif")).on("close", () => api.sendMessage({attachment: fs.createReadStream(__dirname + "/src/randompic.gif")}, threadID, () => fs.unlinkSync(__dirname + "/src/randompic.gif"), messageID));
+					request(stringURL).pipe(fs.createWriteStream(__dirname + "/src/randompic.gif")).on("close", () => api.sendMessage({ attachment: fs.createReadStream(__dirname + "/src/randompic.gif") }, threadID, () => fs.unlinkSync(__dirname + "/src/randompic.gif"), messageID));
 				});
 			}
 			else if (content.indexOf(`capoo`) == 0) {
@@ -590,7 +594,7 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 					if (err) throw err;
 					var string = JSON.parse(body);
 					var stringURL = string.results[0].media[0].tinygif.url;
-					request(stringURL).pipe(fs.createWriteStream(__dirname + "/src/randompic.gif")).on("close", () => api.sendMessage({attachment: fs.createReadStream(__dirname + "/src/randompic.gif")}, threadID, () => fs.unlinkSync(__dirname + "/src/randompic.gif"), messageID));
+					request(stringURL).pipe(fs.createWriteStream(__dirname + "/src/randompic.gif")).on("close", () => api.sendMessage({ attachment: fs.createReadStream(__dirname + "/src/randompic.gif") }, threadID, () => fs.unlinkSync(__dirname + "/src/randompic.gif"), messageID));
 				});
 			}
 			else if (content.indexOf(`mixi`) == 0) {
@@ -598,7 +602,7 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 					if (err) throw err;
 					var string = JSON.parse(body);
 					var stringURL = string.results[0].media[0].tinygif.url;
-					request(stringURL).pipe(fs.createWriteStream(__dirname + "/src/randompic.gif")).on("close", () => api.sendMessage({attachment: fs.createReadStream(__dirname + "/src/randompic.gif")}, threadID, () => fs.unlinkSync(__dirname + "/src/randompic.gif"), messageID));
+					request(stringURL).pipe(fs.createWriteStream(__dirname + "/src/randompic.gif")).on("close", () => api.sendMessage({ attachment: fs.createReadStream(__dirname + "/src/randompic.gif") }, threadID, () => fs.unlinkSync(__dirname + "/src/randompic.gif"), messageID));
 				});
 			}
 			else if (content.indexOf(`bomman`) == 0) {
@@ -606,7 +610,7 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 					if (err) throw err;
 					var string = JSON.parse(body);
 					var stringURL = string.results[0].media[0].tinygif.url;
-					request(stringURL).pipe(fs.createWriteStream(__dirname + "/src/randompic.gif")).on("close", () => api.sendMessage({attachment: fs.createReadStream(__dirname + "/src/randompic.gif")}, threadID, () => fs.unlinkSync(__dirname + "/src/randompic.gif"), messageID));
+					request(stringURL).pipe(fs.createWriteStream(__dirname + "/src/randompic.gif")).on("close", () => api.sendMessage({ attachment: fs.createReadStream(__dirname + "/src/randompic.gif") }, threadID, () => fs.unlinkSync(__dirname + "/src/randompic.gif"), messageID));
 				});
 			}
 			else return api.sendMessage(getText('incorrectSyntax', prefix, 'gif'), threadID, messageID);
@@ -614,12 +618,12 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 
 		//hug
 		if (contentMessage.indexOf(`${prefix}hug`) == 0 && contentMessage.indexOf('@') !== -1)
-			return request('https://nekos.life/api/v2/img/hug', (err, response, body) =>{
+			return request('https://nekos.life/api/v2/img/hug', (err, response, body) => {
 				let picData = JSON.parse(body);
 				let getURL = picData.url;
 				let ext = getURL.substring(getURL.lastIndexOf(".") + 1);
 				let tag = contentMessage.slice(prefix.length + 5, contentMessage.length).replace("@", "");
-				let callback = function() {
+				let callback = function () {
 					api.sendMessage({
 						body: tag + ", I wanna hug you ❤️",
 						mentions: [{
@@ -634,12 +638,12 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 
 		//kiss
 		if (contentMessage.indexOf(`${prefix}kiss`) == 0 && contentMessage.indexOf('@') !== -1)
-			return request('https://nekos.life/api/v2/img/kiss', (err, response, body) =>{
+			return request('https://nekos.life/api/v2/img/kiss', (err, response, body) => {
 				let picData = JSON.parse(body);
 				let getURL = picData.url;
 				let ext = getURL.substring(getURL.lastIndexOf(".") + 1);
 				let tag = contentMessage.slice(prefix.length + 6, contentMessage.length).replace("@", "");
-				let callback = function() {
+				let callback = function () {
 					api.sendMessage({
 						body: tag + ", I wanna kiss you ❤️",
 						mentions: [{
@@ -654,12 +658,12 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 
 		//tát
 		if (contentMessage.indexOf(`${prefix}slap`) == 0 && contentMessage.indexOf('@') !== -1)
-			return request('https://nekos.life/api/v2/img/slap', (err, response, body) =>{
+			return request('https://nekos.life/api/v2/img/slap', (err, response, body) => {
 				let picData = JSON.parse(body);
 				let getURL = picData.url;
 				let ext = getURL.substring(getURL.lastIndexOf(".") + 1);
 				let tag = contentMessage.slice(prefix.length + 5, contentMessage.length).replace("@", "");
-				let callback = function() {
+				let callback = function () {
 					api.sendMessage({
 						body: tag + ", take this slap 😈",
 						mentions: [{
@@ -674,11 +678,11 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 
 		//meow
 		if (contentMessage.indexOf(`${prefix}meow`) == 0)
-			return request('http://aws.random.cat/meow', (err, response, body) =>{
+			return request('http://aws.random.cat/meow', (err, response, body) => {
 				let picData = JSON.parse(body);
 				let getURL = picData.file;
 				let ext = getURL.substring(getURL.lastIndexOf(".") + 1);
-				let callback = function() {
+				let callback = function () {
 					api.sendMessage({
 						attachment: fs.createReadStream(__dirname + `/src/meow.${ext}`)
 					}, threadID, () => fs.unlinkSync(__dirname + `/src/meow.${ext}`), messageID);
@@ -822,8 +826,8 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 			}, threadID, () => fs.unlinkSync(pathImg), messageID);
 		}
 
-	/* ==================== General Commands ================*/
-	
+		/* ==================== General Commands ================*/
+
 		//shortcut
 		if (contentMessage.indexOf(`${prefix}short`) == 0) {
 			var content = contentMessage.slice(prefix.length + 6, contentMessage.length);
@@ -840,7 +844,7 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 					fs.writeFile(__dirname + "/src/shortcut.json", JSON.stringify(oldData), "utf-8", (err) => (err) ? console.error(err) : api.sendMessage(getText('deletedShort'), threadID, messageID));
 				});
 			}
-			else if (content.indexOf(`all`) == 0) 
+			else if (content.indexOf(`all`) == 0)
 				return fs.readFile(__dirname + "/src/shortcut.json", "utf-8", (err, data) => {
 					if (err) throw err;
 					let allData = JSON.parse(data);
@@ -902,7 +906,7 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 				if (content.indexOf(":") == -1) return api.sendMessage(getText('incorrectSyntax', prefix, 'sleep'), threadID, messageID);
 				var contentHour = content.split(":")[0];
 				var contentMinute = content.split(":")[1];
-				if (isNaN(contentHour) || isNaN(contentMinute) || contentHour > 23 || contentMinute > 59 || contentHour < 0 || contentMinute < 0 || contentHour.length != 2 || contentMinute.length != 2)  return api.sendMessage(`Không đúng format, hãy xem trong ${prefix}help`, threadID, messageID);				var getTime = moment().utcOffset("+07:00").format();
+				if (isNaN(contentHour) || isNaN(contentMinute) || contentHour > 23 || contentMinute > 59 || contentHour < 0 || contentMinute < 0 || contentHour.length != 2 || contentMinute.length != 2) return api.sendMessage(getText('incorrectSyntax', prefix, 'sleep'), threadID, messageID); var getTime = moment().utcOffset("+07:00").format();
 				var time = getTime.slice(getTime.indexOf("T") + 1, getTime.indexOf("+"));
 				var sleepTime = getTime.replace(time.split(":")[0] + ":", contentHour + ":").replace(time.split(":")[1] + ":", contentMinute + ":");
 				for (var i = 1; i < 7; i++) wakeTime.push(moment(sleepTime).utcOffset("+07:00").add(90 * i + 15, 'm').format("HH:mm"));
@@ -918,7 +922,7 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 			var sleepTime = [];
 			var contentHour = content.split(":")[0];
 			var contentMinute = content.split(":")[1];
-			if (isNaN(contentHour) || isNaN(contentMinute) || contentHour > 23 || contentMinute > 59 || contentHour < 0 || contentMinute < 0 || contentHour.length != 2 || contentMinute.length != 2)  return api.sendMessage(`Không đúng format, hãy xem trong ${prefix}help`, threadID, messageID);
+			if (isNaN(contentHour) || isNaN(contentMinute) || contentHour > 23 || contentMinute > 59 || contentHour < 0 || contentMinute < 0 || contentHour.length != 2 || contentMinute.length != 2) return api.sendMessage(getText('incorrectSyntax', prefix, 'wake'), threadID, messageID);
 			var getTime = moment().utcOffset("+07:00").format();
 			var time = getTime.slice(getTime.indexOf("T") + 1, getTime.indexOf("+"));
 			var wakeTime = getTime.replace(time.split(":")[0] + ":", contentHour + ":").replace(time.split(":")[1] + ":", contentMinute + ":");
@@ -960,7 +964,7 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 		if (contentMessage.indexOf(`${prefix}reminder`) == 0) {
 			const time = contentMessage.slice(prefix.length + 9, contentMessage.length);
 			if (isNaN(time)) return api.sendMessage(getText('isNaN'), threadID, messageID);
-			const display = time > 59 ? getText('timeMin', time / 60): getText('timeSec', time);
+			const display = time > 59 ? getText('timeMin', time / 60) : getText('timeSec', time);
 			api.sendMessage(getText('remindAfter', display), threadID, messageID);
 			await new Promise(resolve => setTimeout(resolve, time * 1000));
 			api.sendMessage({
@@ -1006,7 +1010,7 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 		//giveaway
 		if (contentMessage.indexOf(`${prefix}ga`) == 0) {
 			var content = contentMessage.slice(prefix.length + 3, contentMessage.length);
-			api.getThreadInfo(threadID,async function(err, info) {
+			api.getThreadInfo(threadID, async function (err, info) {
 				if (err) return api.sendMessage(getText('error'), threadID, messageID);
 				let winner = info.participantIDs[Math.floor(Math.random() * info.participantIDs.length)];
 				let userInfo = await User.getInfo(winner);
@@ -1025,7 +1029,7 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 		//thời tiết
 		if (contentMessage.indexOf(`${prefix}weather`) == 0) {
 			var city = contentMessage.slice(prefix.length + 8, contentMessage.length);
-			if (city.length == 0) return api.sendMessage(getText('incorrectSyntax', prefix, 'weather'),threadID, messageID);
+			if (city.length == 0) return api.sendMessage(getText('incorrectSyntax', prefix, 'weather'), threadID, messageID);
 			request(encodeURI("https://api.openweathermap.org/data/2.5/weather?q=" + city + "&appid=" + openweather + "&units=metric&lang=" + process.env.LANGUAGE), (err, response, body) => {
 				if (err) throw err;
 				var weatherData = JSON.parse(body);
@@ -1047,10 +1051,10 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 		//say
 		if (contentMessage.indexOf(`${prefix}say`) == 0) {
 			var content = (event.type == "message_reply") ? event.messageReply.body : contentMessage.slice(prefix.length + 4, contentMessage.length);
-			var languageToSay = (["ru","en","ko","ja"].some(item => content.indexOf(item) == 0)) ? content.slice(0, content.indexOf(" ")) : 'vi';
+			var languageToSay = (["ru", "en", "ko", "ja"].some(item => content.indexOf(item) == 0)) ? content.slice(0, content.indexOf(" ")) : 'vi';
 			var msg = (languageToSay != 'vi') ? content.slice(3, contentMessage.length) : content;
-			var callback = () => api.sendMessage({body: "", attachment: fs.createReadStream(__dirname + "/src/say.mp3")}, threadID, () => fs.unlinkSync(__dirname + "/src/say.mp3"));
-			return request(`https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(msg)}&tl=${languageToSay}&client=tw-ob`).pipe(fs.createWriteStream(__dirname+'/src/say.mp3')).on('close',() => callback());
+			var callback = () => api.sendMessage({ body: "", attachment: fs.createReadStream(__dirname + "/src/say.mp3") }, threadID, () => fs.unlinkSync(__dirname + "/src/say.mp3"));
+			return request(`https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(msg)}&tl=${languageToSay}&client=tw-ob`).pipe(fs.createWriteStream(__dirname + '/src/say.mp3')).on('close', () => callback());
 		}
 
 		//cập nhật tình hình dịch
@@ -1064,9 +1068,9 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 		//chọn
 		if (contentMessage.indexOf(`${prefix}choose`) == 0) {
 			var input = contentMessage.slice(prefix.length + 7, contentMessage.length).trim();
-			if (!input) return api.sendMessage(getText('incorrectSyntax', prefix, 'choose'),threadID,messageID);
+			if (!input) return api.sendMessage(getText('incorrectSyntax', prefix, 'choose'), threadID, messageID);
 			var array = input.split(" | ");
-			return api.sendMessage(getText('choose', array[Math.floor(Math.random() * array.length)]),threadID,messageID);
+			return api.sendMessage(getText('choose', array[Math.floor(Math.random() * array.length)]), threadID, messageID);
 		}
 
 		//waifu
@@ -1097,7 +1101,6 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 			const createCard = require("../controllers/rank_card.js");
 			var content = contentMessage.slice(prefix.length + 5, contentMessage.length);
 			let all = await User.getUsers(['uid', 'point']);
-			let target;
 			all.sort((a, b) => {
 				if (a.point > b.point) return -1;
 				if (a.point < b.point) return 1;
@@ -1108,7 +1111,7 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 				let rank = all.findIndex(item => item.uid == senderID) + 1;
 				let name = await User.getName(senderID);
 				if (rank == 0) api.sendMessage(getText('cantGetRank1'), threadID, messageID);
-				else Rank.getInfo(senderID).then(point => createCard({ id: senderID, name, rank, ...point })).then(path => api.sendMessage({attachment: fs.createReadStream(path)}, threadID, () => fs.unlinkSync(path), messageID));
+				else Rank.getInfo(senderID).then(point => createCard({ id: senderID, name, rank, ...point })).then(path => api.sendMessage({ attachment: fs.createReadStream(path) }, threadID, () => fs.unlinkSync(path), messageID));
 			}
 			else {
 				let mentions = Object.keys(event.mentions);
@@ -1116,7 +1119,7 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 					let name = event.mentions[i].replace('@', '');
 					let rank = all.findIndex(item => item.uid == i) + 1;
 					if (rank == 0) api.sendMessage(getText('cantGetRank2', name), threadID, messageID);
-					else Rank.getInfo(i).then(point => createCard({ id: parseInt(i), name, rank, ...point })).then(path => api.sendMessage({attachment: fs.createReadStream(path)}, threadID, () => fs.unlinkSync(path), messageID));
+					else Rank.getInfo(i).then(point => createCard({ id: parseInt(i), name, rank, ...point })).then(path => api.sendMessage({ attachment: fs.createReadStream(path) }, threadID, () => fs.unlinkSync(path), messageID));
 				});
 			}
 			return;
@@ -1148,7 +1151,7 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 		//uptime
 		if (contentMessage == `${prefix}uptime`) {
 			var time = process.uptime();
-			var hours = Math.floor(time / (60*60));
+			var hours = Math.floor(time / (60 * 60));
 			var minutes = Math.floor((time % (60 * 60)) / 60);
 			var seconds = Math.floor(time % 60);
 			return api.sendMessage(getText('uptime', hours, minutes, seconds), threadID, messageID);
@@ -1181,7 +1184,7 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 				content = contentMessage.slice(prefix.length + 9, contentMessage.length);
 			}
 			if (!content) return api.sendMessage(getText('wikiErr1'), threadID, messageID);
-			return wiki({apiUrl: url}).page(content).catch((err) => api.sendMessage(getText('wikiErr2', content), threadID, messageID)).then(page => (typeof page != 'undefined') ? Promise.resolve(page.summary()).then(val => api.sendMessage(val, threadID, messageID)) : '');
+			return wiki({ apiUrl: url }).page(content).catch(() => api.sendMessage(getText('wikiErr2', content), threadID, messageID)).then(page => (typeof page != 'undefined') ? Promise.resolve(page.summary()).then(val => api.sendMessage(val, threadID, messageID)) : '');
 		}
 
 		//ping
@@ -1199,7 +1202,7 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 						fromIndex: i
 					});
 				}
-				api.sendMessage({body, mentions}, threadID, messageID);
+				api.sendMessage({ body, mentions }, threadID, messageID);
 			});
 
 		//look earth
@@ -1207,7 +1210,7 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 			return request(`https://api.nasa.gov/EPIC/api/natural/images?api_key=DEMO_KEY`, (err, response, body) => {
 				if (err) throw err;
 				var jsonData = JSON.parse(body);
-				var randomNumber = Math.floor(Math.random() * ((jsonData.length -1) + 1));
+				var randomNumber = Math.floor(Math.random() * ((jsonData.length - 1) + 1));
 				var image_name = jsonData[randomNumber].image
 				var date = jsonData[randomNumber].date;
 				var date_split = date.split("-")
@@ -1216,7 +1219,7 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 				var day_and_time = date_split[2];
 				var sliced_date = day_and_time.slice(0, 2);
 				var image_link = `https://epic.gsfc.nasa.gov/archive/natural/${year}/${month}/${sliced_date}/png/` + image_name + ".png";
-				let callback = function() {
+				let callback = function () {
 					api.sendMessage({
 						body: `${jsonData[randomNumber].caption} on ${date}`,
 						attachment: fs.createReadStream(__dirname + `/src/randompic.png`)
@@ -1273,7 +1276,7 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 		//osu!
 		if (contentMessage.indexOf(`osu!`) == 0) {
 			if (!contentMessage.slice(5, contentMessage.length)) return api.sendMessage(getText('osuErr'), threadID, messageID);
-			return request(`http://lemmmy.pw/osusig/sig.php?colour=hex8866ee&uname=${contentMessage.slice(5, contentMessage.length)}&pp=1&countryrank&rankedscore&onlineindicator=undefined&xpbar&xpbarhex`).pipe(fs.createWriteStream(__dirname + `/src/osu!.png`)).on("close", () => api.sendMessage({attachment: fs.createReadStream(__dirname + `/src/osu!.png`)}, threadID, () => fs.unlinkSync(__dirname + `/src/osu!.png`), messageID))
+			return request(`http://lemmmy.pw/osusig/sig.php?colour=hex8866ee&uname=${contentMessage.slice(5, contentMessage.length)}&pp=1&countryrank&rankedscore&onlineindicator=undefined&xpbar&xpbarhex`).pipe(fs.createWriteStream(__dirname + `/src/osu!.png`)).on("close", () => api.sendMessage({ attachment: fs.createReadStream(__dirname + `/src/osu!.png`) }, threadID, () => fs.unlinkSync(__dirname + `/src/osu!.png`), messageID))
 		}
 
 		/* ==================== Study Commands ==================== */
@@ -1282,7 +1285,7 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 		if (contentMessage.indexOf(`${prefix}math`) == 0) {
 			const wolfram = "http://api.wolframalpha.com/v2/result?appid=" + wolfarm + "&i=";
 			var m = contentMessage.slice(prefix.length + 5, contentMessage.length);
-			request(wolfram + encodeURIComponent(m), function(err, response, body) {
+			request(wolfram + encodeURIComponent(m), function (err, response, body) {
 				if (body.toString() === "Wolfram|Alpha did not understand your input") return api.sendMessage(getText('didntUnderstand'), threadID, messageID);
 				else if (body.toString() === "My name is Wolfram Alpha.") return api.sendMessage(getText('mirai'), threadID, messageID);
 				else if (body.toString() === "I was created by Stephen Wolfram and his team.") return api.sendMessage(getText('created'), threadID, messageID);
@@ -1293,7 +1296,7 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 
 		//cân bằng phương trình hóa học
 		if (contentMessage.indexOf(`${prefix}chemeb`) == 0) {
-			console.log = () => {};
+			console.log = () => { };
 			const chemeb = require('chem-eb');
 			if (event.type == "message_reply") {
 				var msg = event.messageReply.body;
@@ -1319,22 +1322,22 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 			const maxValues = { baby: 10, easy: 50, medium: 100, hard: 500, extreme: 1000, impossible: Number.MAX_SAFE_INTEGER };
 			const operation = operations[Math.floor(Math.random() * operations.length)];
 			value1 = Math.floor(Math.random() * maxValues[difficulty] - 1) + 1;
-			value2 = Math.floor(Math.random() * maxValues[difficulty] -1 ) + 1;
+			value2 = Math.floor(Math.random() * maxValues[difficulty] - 1) + 1;
 			switch (operation) {
 				case '+':
-				answer = value1 + value2;
-				break;
+					answer = value1 + value2;
+					break;
 				case '-':
-				answer = value1 - value2;
-				break;
+					answer = value1 - value2;
+					break;
 				case '*':
-				answer = value1 * value2;
-				break;
+					answer = value1 * value2;
+					break;
 			}
-			return api.sendMessage(getText('15secs', `${value1} ${operation} ${value2} = ?`), threadID, (err, info) => __GLOBAL.reply.push({ type: "domath", messageID: info.messageID, target: parseInt(threadID), author: senderID, answer }), messageID)
+			return api.sendMessage(getText('15secs', `${value1} ${operation} ${value2} = ?`), threadID, (err, info) => __GLOBAL.reply.push({ type: "domath", messageID: info.messageID, target: parseInt(threadID), author: senderID, answer }), messageID);
 		}
 
-	/* ==================== NSFW Commands ==================== */
+		/* ==================== NSFW Commands ==================== */
 
 		//nhentai search
 		if (contentMessage.indexOf(`${prefix}nhentai`) == 0) {
@@ -1353,7 +1356,7 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 				var artists = artistList.join(', ');
 				var characters = characterList.join(', ');
 				if (characters == '') characters = 'Original';
-				api.sendMessage(getText('codeInfo', title, artist, characters, tags, 'https://nhentai.net/g/' + id), threadID, messageID);
+				api.sendMessage(getText('codeInfo', title, artists, characters, tags, 'https://nhentai.net/g/' + id), threadID, messageID);
 			});
 		}
 
@@ -1375,9 +1378,8 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 							const html = response.data;
 							const $ = cheerio.load(html);
 							var getInfo = $('div.container div.main div.page-info');
-							var getUpload = $('div.container div.main div.page-uploader');
 							var getName = getInfo.find('h1').find('a').text();
-							var getTags = getInfo.find('a.tag').contents().map(function() {
+							var getTags = getInfo.find('a.tag').contents().map(function () {
 								return (this.type === 'text') ? $(this).text() + '' : '';
 							}).get().join(', ');
 							var getArtist = getInfo.find('a[href^="/tacgia="]').contents().map(function () {
@@ -1449,7 +1451,7 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 									let ext = mp4URL.substring(mp4URL.lastIndexOf('.') + 1);
 									request(mp4URL).pipe(fs.createWriteStream(__dirname + `/src/porn.${ext}`)).on('close', () => {
 										ffmpeg().input(__dirname + `/src/porn.${ext}`).toFormat("gif").pipe(fs.createWriteStream(__dirname + "/src/porn.gif")).on("close", () => {
-											return api.sendMessage({attachment: fs.createReadStream(__dirname + `/src/porn.gif`)}, threadID, () => {
+											return api.sendMessage({ attachment: fs.createReadStream(__dirname + `/src/porn.gif`) }, threadID, () => {
 												fs.unlinkSync(__dirname + `/src/porn.gif`);
 												fs.unlinkSync(__dirname + `/src/porn.${ext}`);
 											}, messageID);
@@ -1460,7 +1462,7 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 									let image = $('div#photoWrapper');
 									let imgURL = image.find('img').attr('src');
 									let ext = imgURL.substring(imgURL.lastIndexOf('.') + 1);
-									return request(imgURL).pipe(fs.createWriteStream(__dirname + `/src/porn.${ext}`)).on('close', () => api.sendMessage({attachment: fs.createReadStream(__dirname + `/src/porn.${ext}`)}, threadID, () => fs.unlinkSync(__dirname + `/src/porn.${ext}`), messageID));
+									return request(imgURL).pipe(fs.createWriteStream(__dirname + `/src/porn.${ext}`)).on('close', () => api.sendMessage({ attachment: fs.createReadStream(__dirname + `/src/porn.${ext}`) }, threadID, () => fs.unlinkSync(__dirname + `/src/porn.${ext}`), messageID));
 								}
 							}
 						}, (error) => console.log(error));
@@ -1490,7 +1492,7 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 					let getURL = "";
 					(!picData.data) ? getURL = picData.url : getURL = picData.data.response.url;
 					let ext = getURL.substring(getURL.lastIndexOf(".") + 1);
-					request(getURL).pipe(fs.createWriteStream(__dirname + `/src/hentai.${ext}`)).on("close", () => api.sendMessage({attachment: fs.createReadStream(__dirname + `/src/hentai.${ext}`)}, threadID, () => fs.unlinkSync(__dirname + `/src/hentai.${ext}`), messageID));
+					request(getURL).pipe(fs.createWriteStream(__dirname + `/src/hentai.${ext}`)).on("close", () => api.sendMessage({ attachment: fs.createReadStream(__dirname + `/src/hentai.${ext}`) }, threadID, () => fs.unlinkSync(__dirname + `/src/hentai.${ext}`), messageID));
 				});
 			});
 		}
@@ -1499,8 +1501,6 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 		if (contentMessage == `${prefix}mynsfw`) {
 			if (__GLOBAL.NSFWBlocked.includes(threadID)) return api.sendMessage(getText('offNSFW'), threadID, messageID);
 			let tier = await Nsfw.getNSFW(senderID);
-			let hentai = await Nsfw.hentaiUseLeft(senderID);
-			let porn = await Nsfw.pornUseLeft(senderID);
 			if (tier == -1) api.sendMessage(getText('godmodeNSFW'), threadID, messageID);
 			else api.sendMessage(getText('myNSFW'), threadID, messageID);
 			return;
@@ -1547,6 +1547,7 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 						id: mention
 					}]
 				}, threadID, () => Nsfw.setNSFW(mention, parseInt(tierSet)), messageID);
+			return;
 		}
 
 		/* ==================== Economy and Minigame Commands ==================== */
@@ -1624,7 +1625,7 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 
 		//roulette
 		if (contentMessage.indexOf(`${prefix}roul`) == 0) {
-			return Economy.getMoney(senderID).then(function(moneydb) {
+			return Economy.getMoney(senderID).then(function (moneydb) {
 				var content = contentMessage.slice(prefix.length + 5, contentMessage.length);
 				if (!content) return api.sendMessage(getText('incorrectSyntax', prefix, 'roul'), threadID, messageID);
 				var color = content.split(" ")[0];
@@ -1635,7 +1636,7 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 				if (money < 50) return api.sendMessage(getText('betToLow'), threadID, messageID);
 				var check = (num) => (num == 0) ? '💙' : (num % 2 == 0 && num % 6 != 0 && num % 10 != 0) ? '♥️' : (num % 3 == 0 && num % 6 != 0) ? '💚' : (num % 5 == 0 && num % 10 != 0) ? '💛' : (num % 10 == 0) ? '💜' : '🖤️';
 				let random = Math.floor(Math.random() * 50);
-				
+
 				if (color == "e" || color == "blue") color = 0;
 				else if (color == "r" || color == "red") color = 1;
 				else if (color == "g" || color == "green") color = 2;
@@ -1643,25 +1644,25 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 				else if (color == "v" || color == "violet") color = 4;
 				else if (color == "b" || color == "black") color = 5;
 				else return api.sendMessage(getText('incorrectSyntax', prefix, 'roul'), threadID, messageID);
-				
+
 				if (color == 0 && check(random) == '💙') api.sendMessage(getText('roulWon', '💙', '2', money * 2), threadID, () => Economy.addMoney(senderID, parseInt(money * 2)), messageID);
 				else if (color == 1 && check(random) == '♥️') api.sendMessage(getText('roulWon', '♥️', '1.75', money * 1.75), threadID, () => Economy.addMoney(senderID, parseInt(money * 1.75)), messageID);
 				else if (color == 2 && check(random) == '💚') api.sendMessage(getText('roulWon', '💚', '1.5', money * 1.5), threadID, () => Economy.addMoney(senderID, parseInt(money * 1.5)), messageID);
 				else if (color == 3 && check(random) == '💛') api.sendMessage(getText('roulWon', '💛', '1.25', money * 1.25), threadID, () => Economy.addMoney(senderID, parseInt(money * 1.25)), messageID);
 				else if (color == 4 && check(random) == '💜') api.sendMessage(getText('roulWon', '💜', '1', money * 1), threadID, () => Economy.addMoney(senderID, parseInt(money)), messageID);
 				else if (color == 5 && check(random) == '🖤️') api.sendMessage(getText('roulWon', '🖤️', '0.5', money * 0.5), threadID, () => Economy.addMoney(senderID, parseInt(money * 0.5)), messageID);
-				else api.sendMessage(getText('roulLose', random), threadID, () => Economy.subtractMoney(senderID, money), messageID)
+				else api.sendMessage(getText('roulLose', check(random)), threadID, () => Economy.subtractMoney(senderID, money), messageID)
 			});
 		}
 
 		//slot
 		if (contentMessage.indexOf(`${prefix}sl`) == 0) {
-			const slotItems = ["🍇","🍉","🍊","🍏","7⃣","🍓","🍒","🍌","🥝","🥑","🌽"];
+			const slotItems = ["🍇", "🍉", "🍊", "🍏", "7⃣", "🍓", "🍒", "🍌", "🥝", "🥑", "🌽"];
 			return Economy.getMoney(senderID).then((moneydb) => {
 				var money = contentMessage.slice(prefix.length + 3, contentMessage.length);
 				if (!money) return api.sendMessage(getText('incorrectSyntax', prefix, 'sl'), threadID, messageID);
 				let win = false;
-				if (isNaN(money)|| money.indexOf("-") !== -1) return api.sendMessage(getText('isNaN'), threadID, messageID);
+				if (isNaN(money) || money.indexOf("-") !== -1) return api.sendMessage(getText('isNaN'), threadID, messageID);
 				if (money > moneydb) return api.sendMessage(getText('notEnoughMoney'), threadID, messageID);
 				if (money < 50) return api.sendMessage(getText('betToLow'), threadID, messageID);
 				let number = [];
@@ -1674,7 +1675,7 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 					money *= 2;
 					win = true;
 				}
-				(win) ? api.sendMessage(getText('slotWon', slotItems[number[0]], slotItems[number[1]], slotItems[number[2]], money), threadID, () => Economy.addMoney(senderID, parseInt(money)), messageID) : api.sendMessage(getText('slotWon', slotItems[number[0]], slotItems[number[1]], slotItems[number[2]], money), threadID, () => Economy.subtractMoney(senderID, parseInt(money)), messageID);
+				(win) ? api.sendMessage(getText('slotWon', slotItems[number[0]], slotItems[number[1]], slotItems[number[2]], money), threadID, () => Economy.addMoney(senderID, parseInt(money)), messageID) : api.sendMessage(getText('slotLose', slotItems[number[0]], slotItems[number[1]], slotItems[number[2]], money), threadID, () => Economy.subtractMoney(senderID, parseInt(money)), messageID);
 			});
 		}
 
@@ -1704,7 +1705,7 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 		//setmoney
 		if (contentMessage.indexOf(`${prefix}setmoney`) == 0 && admins.includes(senderID)) {
 			var mention = Object.keys(event.mentions)[0];
-			var content = contentMessage.slice(prefix.length + 9,contentMessage.length);
+			var content = contentMessage.slice(prefix.length + 9, contentMessage.length);
 			var sender = content.slice(0, content.lastIndexOf(" "));
 			var moneySet = content.substring(content.lastIndexOf(" ") + 1);
 			if (isNaN(moneySet)) return api.sendMessage(getText('isNaN'), threadID, messageID);
@@ -1721,7 +1722,7 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 		// steal
 		if (contentMessage == `${prefix}steal`) {
 			let cooldown = 1800000;
-			Economy.getStealTime(senderID).then(async function(lastSteal) {
+			Economy.getStealTime(senderID).then(async function (lastSteal) {
 				if (lastSteal !== null && cooldown - (Date.now() - lastSteal) > 0) {
 					let time = ms(cooldown - (Date.now() - lastSteal));
 					api.sendMessage(getText('stealCooldown', time.minutes, time.seconds), threadID, messageID);
@@ -1749,7 +1750,7 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 					else if (route == 1) {
 						Economy.getMoney(senderID).then(moneydb => {
 							if (moneydb <= 0) return api.sendMessage(getText('needMoney'), threadID, messageID);
-							else if (moneydb > 0) return api.sendMessage(getText('stealFailed2', moneydb), threadID, () => api.sendMessage({body: getText('congratHero', nameVictim, name, Math.floor(moneydb / 2)), mentions: [{ tag: nameVictim, id: victim}, {tag: name, id: senderID}]}, threadID, () => {
+							else if (moneydb > 0) return api.sendMessage(getText('stealFailed2', moneydb), threadID, () => api.sendMessage({ body: getText('congratHero', nameVictim, name, Math.floor(moneydb / 2)), mentions: [{ tag: nameVictim, id: victim }, { tag: name, id: senderID }] }, threadID, () => {
 								Economy.subtractMoney(senderID, moneydb);
 								Economy.addMoney(victim, parseInt(Math.floor(moneydb / 2)));
 							}), messageID);
@@ -1762,7 +1763,7 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 		//fishing
 		if (contentMessage.indexOf(`${prefix}fishing`) == 0) {
 			let inventory = await Fishing.getInventory(senderID);
-			let timeout = ['30000','25000','20000','15000','5000'];
+			let timeout = ['30000', '25000', '20000', '15000', '5000'];
 			var content = contentMessage.slice(prefix.length + 8, contentMessage.length);
 			var rodLevel = inventory.rod - 1;
 			if (!content) {
@@ -1779,76 +1780,76 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 				if (Math.floor(Math.random() * 51) == 51) {
 					let difficulty, answer, value1, value2;
 					var difficulties = ['baby', 'easy', 'medium', 'hard', 'extreme'];
-					difficulty =  difficulties[Math.floor(Math.random() * difficulties.length)];
+					difficulty = difficulties[Math.floor(Math.random() * difficulties.length)];
 					var operations = ['+', '-', '*'];
-					var maxValues = { baby: 10,easy: 50,medium: 100,hard: 500,extreme: 1000 };
+					var maxValues = { baby: 10, easy: 50, medium: 100, hard: 500, extreme: 1000 };
 					var operation = operations[Math.floor(Math.random() * operations.length)];
 					value1 = Math.floor(Math.random() * maxValues[difficulty] - 1) + 1;
 					value2 = Math.floor(Math.random() * maxValues[difficulty] - 1) + 1;
 					switch (operation) {
 						case '+':
-						answer = value1 + value2;
-						break;
+							answer = value1 + value2;
+							break;
 						case '-':
-						answer = value1 - value2;
-						break;
+							answer = value1 - value2;
+							break;
 						case '*':
-						answer = value1 * value2;
-						break;
+							answer = value1 * value2;
+							break;
 					}
 					await Fishing.updateLastTimeFishing(senderID, new Date());
 					return api.sendMessage(getText('defeatMonster', difficulty, `${value1} ${operation} ${value2} = ?`), threadID, (err, info) => __GLOBAL.reply.push({ type: "fishing_domath", messageID: info.messageID, target: parseInt(threadID), author: senderID, answer }), messageID)
 				}
 				if (roll <= 400) {
-					var arrayTrash = ["🏐","💾","📎","💩","🦴","🥾","🥾","🌂"];
+					var arrayTrash = ["🏐", "💾", "📎", "💩", "🦴", "🥾", "🥾", "🌂"];
 					inventory.trash += 1;
 					stats.trash += 1;
-					api.sendMessage(arrayTrash[Math.floor(Math.random() * arrayTrash.length)] + ' | Oh, xung quanh bạn toàn là rác êii', threadID, messageID);
+					api.sendMessage(arrayTrash[Math.floor(Math.random() * arrayTrash.length)] + getText('caught', getText('trashes')), threadID, messageID);
 				}
 				else if (roll > 400 && roll <= 700) {
 					inventory.fish1 += 1;
 					stats.fish1 += 1;
-					api.sendMessage('🐟 | ' + getText('caught', 'normal fish'), threadID, messageID);
+					api.sendMessage('🐟 | ' + getText('caught', getText('fish1')), threadID, messageID);
 				}
 				else if (roll > 700 && roll <= 900) {
 					inventory.fish2 += 1;
 					stats.fish2 += 1;
-					api.sendMessage('🐠 | ' + getText('caught', 'rare fish'), threadID, messageID);
+					api.sendMessage('🐠 | ' + getText('caught', getText('fish2')), threadID, messageID);
 				}
 				else if (roll > 900 && roll <= 960) {
 					inventory.crabs += 1;
 					stats.crabs += 1;
-					api.sendMessage('🦀 | ' + getText('caught', 'crab'), threadID, messageID);
+					api.sendMessage('🦀 | ' + getText('caught', getText('crabs')), threadID, messageID);
 				}
 				else if (roll > 960 && roll <= 1001) {
 					inventory.blowfishes += 1;
 					stats.blowfishes += 1;
-					api.sendMessage('🐡 | ' + getText('caught', 'blowfish'), threadID, messageID);
+					api.sendMessage('🐡 | ' + getText('caught', getText('blowfishes')), threadID, messageID);
 				}
 				else if (roll == 1002) {
 					inventory.crocodiles += 1;
 					stats.crocodiles += 1;
-					api.sendMessage('🐊 | ' + getText('caught', 'crocodile'), threadID, messageID);
+					api.sendMessage('🐊 | ' + getText('caught', getText('crocodiles')), threadID, messageID);
 				}
 				else if (roll == 1003) {
 					inventory.whales += 1;
 					stats.whales += 1;
-					api.sendMessage('🐋 | ' + getText('caught', 'whale'), threadID, messageID);
+					api.sendMessage('🐋 | ' + getText('caught', getText('whales')), threadID, messageID);
 				}
 				else if (roll == 1004) {
 					inventory.dolphins += 1;
 					stats.dolphins += 1;
-					api.sendMessage('🐬 | ' + getText('caught', 'dolphin'), threadID, messageID);
+					api.sendMessage('🐬 | ' + getText('caught', getText('dolphins')), threadID, messageID);
 				}
 				else if (roll == 1006) {
 					inventory.squids += 1;
 					stats.squids += 1;
-					api.sendMessage('🦑 | ' + getText('caught', 'squid'), threadID, messageID);
+					api.sendMessage('🦑 | ' + getText('caught', getText('squids')), threadID, messageID);
 				}
 				else if (roll == 1007) {
 					inventory.sharks += 1;
 					stats.sharks += 1;
-					api.sendMessage('🦈 | ' + getText('caught', 'shark'), threadID, messageID);
+					api.sendMessage('🦈 | ' + getText('caught', getText('sharks')), threadID, messageID);
 				}
 				await Fishing.updateLastTimeFishing(senderID, new Date());
 				await Fishing.updateInventory(senderID, inventory);
@@ -1856,8 +1857,7 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 			}
 			else if (content.indexOf('bag') == 0) {
 				if (inventory.rod == 0) return api.sendMessage(getText('noRod'), threadID, messageID);
-				let durability = ['50','70','100','130','200','400'];
-				let expToLevelup = ['1000','2000','4000','6000','8000'];
+				let durability = ['50', '70', '100', '130', '200', '400'];
 				var total = inventory.trashes + inventory.fish1 * 30 + inventory.fish2 * 100 + inventory.crabs * 250 + inventory.blowfishes * 300 + inventory.crocodiles * 500 + inventory.whales * 750 + inventory.dolphins * 750 + inventory.squids * 1000 + inventory.sharks * 1000;
 				api.sendMessage(getText('inv1', inventory.rod, inventory.durability, durability[rodLevel]) + getText('inv2', inventory.trashes, inventory.fish1, inventory.fish2, inventory.crabs, inventory.blowfishes, inventory.crocodiles, inventory.whales, inventory.dolphins, inventory.squids, inventory.sharks) + getText('inv3', total), threadID, messageID);
 			}
@@ -1943,7 +1943,7 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 				return api.sendMessage(getText('itemList'), threadID, messageID);
 			else if (content.indexOf("steal") == 0) {
 				let cooldown = 1800000;
-				Fishing.getStealFishingTime(senderID).then(async function(lastStealFishing) {
+				Fishing.getStealFishingTime(senderID).then(async function (lastStealFishing) {
 					if (lastStealFishing !== null && cooldown - (Date.now() - lastStealFishing) > 0) {
 						let time = ms(cooldown - (Date.now() - lastStealFishing));
 						return api.sendMessage(getText('stealFishCooldown', time.minutes, time.seconds), threadID, messageID);
@@ -2062,7 +2062,7 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 			}
 			else if (content.indexOf('shop') == 0) return api.sendMessage(getText('fishingShop'), threadID, (err, info) => __GLOBAL.reply.push({ type: "fishing_shop", messageID: info.messageID, target: parseInt(threadID), author: senderID }));
 		}
-		
+
 
 		/* ==================== System Check ==================== */
 
@@ -2080,10 +2080,11 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 			if (checkCmd.bestMatch.rating >= 0.3) return api.sendMessage(getText('cmdNotFound', prefix + checkCmd.bestMatch.target), threadID, messageID);
 		}
 
+		//Level up notification
 		if (contentMessage && !__GLOBAL.blockLevelUp.includes(threadID)) {
 			let point = await Rank.getPoint(senderID);
 			var curLevel = Math.floor((Math.sqrt(1 + (4 * point) / 3) + 1) / 2);
-			var level =  Math.floor((Math.sqrt(1 + (4 * (point + 1)) / 3) + 1) / 2);
+			var level = Math.floor((Math.sqrt(1 + (4 * (point + 1)) / 3) + 1) / 2);
 			if (level > curLevel) {
 				let name = await User.getName(senderID);
 				return api.sendMessage({
@@ -2096,10 +2097,6 @@ module.exports = function({ api, config, __GLOBAL, User, Thread, Rank, Economy, 
 				}, threadID)
 			}
 		}
-		__GLOBAL.messages.push({
-			msgID: messageID,
-			msgBody: contentMessage
-		});
 	}
 }
 /* This bot was made by Catalizcs(roxtigger2003) and SpermLord(spermlord) with love <3, pls dont delete this credits! THANKS */

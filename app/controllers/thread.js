@@ -1,5 +1,5 @@
 const logger = require("../modules/log.js");
-module.exports = function({ models, api, __GLOBAL }) {
+module.exports = function ({ models, api, __GLOBAL }) {
 	const Thread = models.use('thread');
 
 	function getText(...args) {
@@ -15,7 +15,7 @@ module.exports = function({ models, api, __GLOBAL }) {
 		if (!await Thread.findOne({ where: { threadID } })) {
 			let threadInfo = await getInfo(threadID);
 			let name = threadInfo.name;
-			let [ thread, created ] = await Thread.findOrCreate({ where: { threadID }, defaults: { name } });
+			let [thread, created] = await Thread.findOrCreate({ where: { threadID }, defaults: { name } });
 			if (created) return logger(threadID, getText('newThread'));
 		}
 		else return;

@@ -1,6 +1,6 @@
 {
-	"name": "ProjectMirai",
-	"version": "4.7.0-24.1",
+	"name": "ProjectMiraiBeta",
+	"version": "4.7.0-25",
 	"description": "Project Mirai sẽ biến tài khoản Facebook của bạn trở thành một con bot thú vị.",
 	"newDB": true,
 	"main": "index.js",
@@ -9,7 +9,7 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/roxtigger2003/mirai.git"
+		"url": "git+https://github.com/catalizcs/mirai-beta.git"
 	},
 	"keywords": [
 		"bot",
@@ -23,9 +23,9 @@
 	"author": "roxtigger2003 & SpermLord",
 	"license": "GPL-3.0",
 	"bugs": {
-		"url": "https://github.com/roxtigger2003/mirai/issues"
+		"url": "https://github.com/catalizcs/mirai-beta/issues"
 	},
-	"homepage": "https://github.com/roxtigger2003/mirai#readme",
+	"homepage": "https://github.com/catalizcs/mirai-beta#readme",
 	"engines": {
 		"node": "12.x"
 	},

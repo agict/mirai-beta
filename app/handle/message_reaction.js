@@ -1,4 +1,4 @@
-module.exports = function({ api, __GLOBAL, Economy, Fishing }) {
+module.exports = function ({ api, __GLOBAL, Economy, Fishing }) {
 	function getText(...args) {
 		const langText = __GLOBAL.language.reaction;
 		const getKey = args[0];
@@ -11,7 +11,7 @@ module.exports = function({ api, __GLOBAL, Economy, Fishing }) {
 		return text;
 	}
 
-	return async function({ event }) {
+	return async function ({ event }) {
 		const { confirm } = __GLOBAL;
 		if (__GLOBAL.threadBlocked.indexOf(event.threadID) != -1) return;
 		const { userID, threadID, reaction, messageID } = event;
