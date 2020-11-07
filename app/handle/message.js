@@ -92,7 +92,7 @@ module.exports = function ({ api, config, __GLOBAL, User, Thread, Rank, Economy,
 		}
 
 		//sim on/off
-		if (__GLOBAL.simOn.includes(threadID)) request(`https://simsumi.herokuapp.com/api?text=${encodeURIComponent(contentMessage)}&lang=vi`, (err, response, body) => api.sendMessage((JSON.parse(body).success != '') ? JSON.parse(body).success : getText('noAnswer'), threadID, messageID));
+		if (__GLOBAL.simOn.includes(threadID) && senderID != api.getCurrentUserID()) request(`http://195.201.173.201:26880/sim/${encodeURIComponent(contentMessage)}`, (err, response, body) => api.sendMessage((JSON.parse(body).out != '') ? JSON.parse(body).out : getText('noAnswer'), threadID, messageID));
 
 		//Get cmds.json
 		var nocmdData = JSON.parse(fs.readFileSync(__dirname + "/src/cmds.json"));
@@ -147,6 +147,7 @@ module.exports = function ({ api, config, __GLOBAL, User, Thread, Rank, Economy,
 		if (contentMessage.indexOf(`${prefix}admin`) == 0 && admins.includes(senderID)) {
 			var contentSplit = contentMessage.split(" ");
 			var content = contentSplit[1];
+			if (!content) api.sendMessage(getText('incorrectSyntax', prefix, 'admin'), threadID, messageID);
 			var arg = contentSplit[2];
 			var helpList = JSON.parse(fs.readFileSync(__dirname + "/src/help/listAC.json"));
 			if (content.indexOf("all") == 0) {
@@ -935,7 +936,7 @@ module.exports = function ({ api, config, __GLOBAL, User, Thread, Rank, Economy,
 		}
 
 		//simsimi
-		if (contentMessage.indexOf(`${prefix}sim`) == 0) return request(`https://simsumi.herokuapp.com/api?text=${encodeURIComponent(contentMessage.slice(prefix.length + 4, contentMessage.length))}&lang=vi`, (err, response, body) => api.sendMessage((JSON.parse(body).success != '') ? JSON.parse(body).success : getText('noAnswer'), threadID, messageID));
+		if (contentMessage.indexOf(`${prefix}sim`) == 0) return request(`http://195.201.173.201:26880/sim/${encodeURIComponent(contentMessage.slice(prefix.length + 4, contentMessage.length))}`, (err, response, body) => api.sendMessage((JSON.parse(body).out != '') ? JSON.parse(body).out : getText('noAnswer'), threadID, messageID));
 
 		//mit
 		if (contentMessage.indexOf(`${prefix}mit`) == 0) return request(`https://kakko.pandorabots.com/pandora/talk-xml?input=${encodeURIComponent(contentMessage.slice(prefix.length + 4, contentMessage.length))}&botid=9fa364f2fe345a10&custid=${senderID}`, (err, response, body) => api.sendMessage((/<that>(.*?)<\/that>/.exec(body)[1]), threadID, messageID));
@@ -1386,9 +1387,6 @@ module.exports = function ({ api, config, __GLOBAL, User, Thread, Rank, Economy,
 			return Nsfw.pornUseLeft(senderID).then(useLeft => {
 				if (useLeft == 0) return api.sendMessage(getText('exceededNSFW', prefix, 'porn'), threadID, messageID);
 				const cheerio = require('cheerio');
-				const ffmpeg = require("fluent-ffmpeg");
-				const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path;
-				ffmpeg.setFfmpegPath(ffmpegPath);
 				var content = contentMessage.slice(prefix.length + 5, contentMessage.length);
 				var album = {
 					'asian': "9057591",
@@ -1433,12 +1431,7 @@ module.exports = function ({ api, config, __GLOBAL, User, Thread, Rank, Economy,
 									let mp4URL = video.find('source').attr('src');
 									let ext = mp4URL.substring(mp4URL.lastIndexOf('.') + 1);
 									request(mp4URL).pipe(fs.createWriteStream(__dirname + `/src/porn.${ext}`)).on('close', () => {
-										ffmpeg().input(__dirname + `/src/porn.${ext}`).toFormat("gif").pipe(fs.createWriteStream(__dirname + "/src/porn.gif")).on("close", () => {
-											return api.sendMessage({ attachment: fs.createReadStream(__dirname + `/src/porn.gif`) }, threadID, () => {
-												fs.unlinkSync(__dirname + `/src/porn.gif`);
-												fs.unlinkSync(__dirname + `/src/porn.${ext}`);
-											}, messageID);
-										});
+										return api.sendMessage({ attachment: fs.createReadStream(__dirname + `/src/porn.${ext}`) }, threadID, () => fs.unlinkSync(__dirname + `/src/porn.${ext}`), messageID);
 									});
 								}
 								else {
