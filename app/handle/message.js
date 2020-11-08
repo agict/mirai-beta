@@ -147,7 +147,7 @@ module.exports = function ({ api, config, __GLOBAL, User, Thread, Rank, Economy,
 		if (contentMessage.indexOf(`${prefix}admin`) == 0 && admins.includes(senderID)) {
 			var contentSplit = contentMessage.split(" ");
 			var content = contentSplit[1];
-			if (!content) api.sendMessage(getText('incorrectSyntax', prefix, 'admin'), threadID, messageID);
+			if (!content) return api.sendMessage(getText('incorrectSyntax', prefix, 'admin'), threadID, messageID);
 			var arg = contentSplit[2];
 			var helpList = JSON.parse(fs.readFileSync(__dirname + "/src/help/listAC.json"));
 			if (content.indexOf("all") == 0) {
