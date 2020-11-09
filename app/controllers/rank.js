@@ -6,6 +6,12 @@ module.exports = function ({ models }) {
 	async function getPoint(uid) {
 		return (await Rank.findOne({ where: { uid } })).get({ plain: true }).point;
 	}
+  
+  async function expToLevel(point) {
+		if (point < 0) return 0;
+		return Math.floor((Math.sqrt(1 + (4 * point) / FACTOR) + 1) / 2);
+	}
+
 
 	async function updatePoint(uid, pointIncrement) {
 		try {
@@ -52,6 +58,7 @@ module.exports = function ({ models }) {
 		getPoint,
 		updatePoint,
 		setPoint,
-		getInfo
+		getInfo,
+    expToLevel
 	};
 };
