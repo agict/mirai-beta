@@ -29,7 +29,7 @@ module.exports = async function (data) {
 	let pathImg = __root + `/rank_card/rank_${id}.png`;
 
 	let avatar = __root + `/rank_card/avt_${id}.png`;
-	let getAvatar = (await axios.get(`https://graph.facebook.com/${id}/picture?width=512&height=512`, { responseType: 'arraybuffer' })).data;
+	let getAvatar = (await axios.get(`https://graph.facebook.com/${id}/picture?width=512&height=512&access_token=701365057372085|448576b4fdc8052a9b5ed75d030b6a3d`, { responseType: 'arraybuffer' })).data;
 	fs.writeFileSync(avatar, Buffer.from(getAvatar, 'utf-8'));
 
 	const canvas = Canvas.createCanvas(934, 282);
@@ -58,7 +58,7 @@ module.exports = async function (data) {
 	ctx.textAlign = "end";
 	ctx.fillText(rank, 934 - 55 - ctx.measureText(level).width - 16 - ctx.measureText(`Lv.`).width - 25, 82);
 	ctx.fillStyle = "#FFFFFF";
-	ctx.fillText("#", 934 - 55 - ctx.measureText(level).width - 16 - ctx.measureText(`Lv.`).width - 16 - ctx.measureText(rank).width - 16, 82);
+	ctx.fillText("Top", 934 - 55 - ctx.measureText(level).width - 16 - ctx.measureText(`Lv.`).width - 16 - ctx.measureText(rank).width - 16, 82);
 
 	ctx.font = `bold 26px Manrope`;
 	ctx.fillStyle = "#FFFFFF";
