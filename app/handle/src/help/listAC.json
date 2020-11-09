@@ -66,9 +66,9 @@
 		"example": "setmoney me 100"
 	},
 	{
-		"name": "admin settings",
+		"name": "settings",
 		"decs": "Bộ công cụ quản lý dành cho quản trị viên của bot",
-		"usage": "admin settings",
-		"example": "admin settings rồi sau đấy reply tin nhắn kèm số setting mà bạn chọn"
+		"usage": "admin settings hoặc admin",
+		"example": "admin settings"
 	}
 ]

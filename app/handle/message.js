@@ -14,7 +14,7 @@ module.exports = function ({ api, config, __GLOBAL, User, Thread, Rank, Economy,
 		const langText = { ...__GLOBAL.language.message, ...__GLOBAL.language.fishing, ...__GLOBAL.language.thread, ...__GLOBAL.language.user };
 		const getKey = args[0];
 		if (!langText.hasOwnProperty(getKey)) throw `${__filename} - Not found key language: ${getKey}`;
-		let text = langText[getKey].replace(/\\n/gi, '\n');
+		let text = langText[getKey];
 		for (let i = 1; i < args.length; i++) {
 			let regEx = RegExp(`%${i}`, 'g');
 			text = text.replace(regEx, args[i]);
@@ -147,19 +147,9 @@ module.exports = function ({ api, config, __GLOBAL, User, Thread, Rank, Economy,
 		if (contentMessage.indexOf(`${prefix}admin`) == 0 && admins.includes(senderID)) {
 			var contentSplit = contentMessage.split(" ");
 			var content = contentSplit[1];
-			if (!content) return api.sendMessage(getText('incorrectSyntax', prefix, 'admin'), threadID, messageID);
 			var arg = contentSplit[2];
 			var helpList = JSON.parse(fs.readFileSync(__dirname + "/src/help/listAC.json"));
-			if (content.indexOf("all") == 0) {
-				var commandAdmin = [];
-				helpList.forEach(help => (!commandAdmin.some(item => item.name == help.name)) ? commandAdmin.push(help.name) : commandAdmin.find(item => item.name == help.name).push(help.name));
-				return api.sendMessage(commandAdmin.join(', '), threadID, messageID);
-			}
-			else if (content.indexOf("help") == 0) {
-				if (helpList.some(item => item.name == arg)) return api.sendMessage(getText('adminHelpCmd', helpList.find(item => item.name == arg).name, helpList.find(item => item.name == arg).decs, prefix + helpList.find(item => item.name == arg).usage, prefix + helpList.find(item => item.name == arg).example), threadID, messageID);
-				else return api.sendMessage(getText('adminHelpInvalid', prefix), threadID, messageID);
-			}
-			else if (content.indexOf("settings") == 0) {
+			if (!content || content.indexOf("settings") == 0) {
 				return api.sendMessage(getText('adminSetting1') + getText('adminSetting2'), threadID, (err, info) => {
 						if (err) throw err;
 						__GLOBAL.reply.push({
@@ -170,6 +160,15 @@ module.exports = function ({ api, config, __GLOBAL, User, Thread, Rank, Economy,
 						});
 					}
 				);
+			}
+			else if (content.indexOf("help") == 0) {
+				if (helpList.some(item => item.name == arg)) return api.sendMessage(getText('adminHelpCmd', helpList.find(item => item.name == arg).name, helpList.find(item => item.name == arg).decs, prefix + helpList.find(item => item.name == arg).usage, prefix + helpList.find(item => item.name == arg).example), threadID, messageID);
+				else return api.sendMessage(getText('adminHelpInvalid', prefix), threadID, messageID);
+			}
+			else if (content.indexOf("all") == 0) {
+				var commandAdmin = [];
+				helpList.forEach(help => (!commandAdmin.some(item => item.name == help.name)) ? commandAdmin.push(help.name) : commandAdmin.find(item => item.name == help.name).push(help.name));
+				return api.sendMessage(commandAdmin.join(', '), threadID, messageID);
 			}
 			else if (content.indexOf("banUser") == 0) {
 				const mentions = Object.keys(event.mentions);
@@ -345,7 +344,7 @@ module.exports = function ({ api, config, __GLOBAL, User, Thread, Rank, Economy,
 			}
 			else if (content.indexOf("addUser") == 0) return api.addUserToGroup(arg, threadID);
 			else if (content.indexOf("restart") == 0) return api.sendMessage(getText('restart'), threadID, () => require("node-cmd").run("pm2 restart 0"), messageID);
-			else return api.sendMessage(getText('cmdNotFound'), threadID, messageID);
+			else return api.sendMessage(getText('adminHelpInvalid'), threadID, messageID);
 		}
 
 		if (contentMessage.indexOf(`${prefix}levelup`) == 0) {
@@ -2053,7 +2052,7 @@ module.exports = function ({ api, config, __GLOBAL, User, Thread, Rank, Economy,
 				checkCmd = stringSimilarity.findBestMatch(contentMessage.slice(prefix.length, findSpace), nocmdData.cmds);
 				if (checkCmd.bestMatch.target == contentMessage.slice(prefix.length, findSpace)) return;
 			}
-			if (checkCmd.bestMatch.rating >= 0.3) return api.sendMessage(getText('cmdNotFound', prefix + checkCmd.bestMatch.target), threadID, messageID);
+			if (checkCmd.bestMatch.rating >= 0.3) return api.sendMessage(getText('cmdNotFound', `${prefix + checkCmd.bestMatch.target}`), threadID, messageID);
 		}
 
 		//Level up notification

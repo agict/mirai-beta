@@ -1,7 +1,6 @@
 # Nếu bạn muốn xuống dòng, hãy dùng\n. VD: SpermLord\nCatalizcs.
 # Sau khi thay đổi, bạn phải khởi động lại bot để có hiệu lực.
 # Đặt kí tự # ở đầu mỗi câu nếu bạn không muốn code chạy những dòng đó.
-# KHÔNG ĐƯỢC DÙNG KÍ TỰ = TRỪ KHI NÓ ĐỂ NGĂN CÁCH GIỮA KEY VÀ TEXT.
 
 # Fishing.js
 fishing.trashes=Rác
@@ -73,7 +72,7 @@ message.disabledNSFW=Đã tắt NSFW thành công!
 message.alreadyOnNSFW=Nhóm này chưa bị tắt NSFW
 message.cantOnNSFW=Oops, không thể bật NSFW ở nhóm này!
 message.enabledNSFW=Đã bật NSFW thành công!
-message.helpInfo=>>> Thông tin lệnh bạn đang tìm <<<\n- Tên lệnh: %1\n- Mô tả: %2\n- Cách dùng: %3\n- Hưỡng dẫn: %4
+message.helpInfo==== Thông tin lệnh bạn đang tìm ===\n- Tên lệnh: %1\n- Mô tả: %2\n- Cách dùng: %3\n- Hưỡng dẫn: %4
 message.adminHelpInvalid=Lệnh bạn nhập không hợp lệ, hãy gõ %1admin all để xem tất cả các lệnh có trong bot..
 message.adminSetting1=🛠 | Đây là toàn bộ cài đặt của bot | 🛠\n\n=== Quản Lý Cài Đặt ===\n[1] Prefix.\n[2] Tên bot.\n[3] Danh sách Admin.\n[4] Ngôn ngữ.\n[5] Tự khởi động lại.
 message.adminSetting2=\n=== Quản Lý Hoạt Động ===\n[6] Kiểm tra cập nhật.\n[7] Lấy danh sách người dùng bị cấm.\n[8] Lấy danh sách nhóm bị cấm.\n[9] Gửi thông báo tới tất cả các nhóm.\n[10] Tìm ID người dùng qua tên.\n[11] Tìm ID nhóm qua tên.\n[12] Áp dụng thay đổi.\n-> Để chọn, hãy reply tin nhắn này với số <-
@@ -128,7 +127,7 @@ message.noVA=Không có kết quả với từ khóa đó.
 message.foundVA=Có %1 kết quả, chọn 1 trong những kết quả dưới đây:\n\n%2
 message.exceededLength=Đã vượt quá độ dài cho phép của %1, tối đa là 6 phút!
 message.processVA=%1 đang được xử lý, thời lượng %1 dài có thể mất vài giây.
-message.allTags=>>> Tất cả các tag %1 <<<\n%2
+message.allTags==== Tất cả các tag %1 ===\n%2
 message.invalidTag=Tag bạn đã nhập không hợp lệ. Nhập %1 để xem tất cả các thẻ.
 message.replyPic=Vui lòng bạn reply bức ảnh cần phải tìm!
 message.onePicOnly=Vui lòng reply chỉ một ảnh!
@@ -185,7 +184,7 @@ message.didntUnderstand=Tôi không hiểu bạn nhập gì.
 message.mirai=Tôi tên là Sumi.
 message.created=Tôi được tạo bởi CatalizCS và SpermLord.
 message.notSupportXYz=Phương trình hóa học rút gọn hiện không được hỗ trợ. Chuyển (XY) z sang dạng XzYz.
-message.15secs=>>> Bạn có 15 giây để trả lời <<<\n%1
+message.15secs==== Bạn có 15 giây để trả lời ===\n%1
 message.offNSFW=NSFW hiện đã bị vô hiệu hóa trong nhóm này.
 message.idealCode=Code lý tưởng là: %1
 message.cantFindHentai=Không tìm thấy truyện Hentai này.
@@ -242,15 +241,15 @@ message.congratHero=Xin chúc mừng %1! Bạn đã bắt được %2 và nhận
 message.noRod=Có vẻ bạn chưa có cần câu để câu cá, bạn hãy mua trong shop!
 message.limitFishTime=Chỉ câu cá mỗi %1 giây một lần.
 message.brokenRod=Cần câu cá của bạn dường như đã bị hỏng, hãy sửa nó trong shop.
-message.defeatMonster=>>> Ôi không, bạn gặp phải con quái vật của hồ này và có độ khó %1, bạn có 15 giây trả lời câu hỏi để hạ gục con quái vật này <<<\n%2
+message.defeatMonster==== Ôi không, bạn gặp phải con quái vật của hồ này và có độ khó %1, bạn có 15 giây trả lời câu hỏi để hạ gục con quái vật này ===\n%2
 message.caught=Bạn đã bắt được một %1 😮
-message.inv1=>>> Túi của bạn <<<\n- Cấp cần câu: %1 (Độ bền: %2/%3)\n- Exp hiện tại: %4/%5\n
+message.inv1==== Túi của bạn ===\n- Cấp cần câu: %1 (Độ bền: %2/%3)\n- Exp hiện tại: %4/%5\n
 message.inv2=- Tất cả các mặt hàng:\n+ Rác: %1\n+ Cá bình thường: %2\n+ Cá hiếm: %3\n+ Cua: %4\n+ Cá nóc: %5\n+ Cá sấu: %6\n+ Cá voi: %7\n+ Cá heo: %8\n+ Mực: %9\n+ Cá mập: %10\n
 message.inv3=- Tổng số tiền bạn có thể nhận được sau khi bán tất cả các mặt hàng: %1 đô.
 message.noSellItem=Nhập mặt hàng bạn muốn bán.
 message.sellItem=Bạn đã bán %1 %2 và nhận được %3 đô la.
-message.sellAllItems=Bạn sẽ nhận được %1 đô la sau khi bán tất cả các mặt hàng trong kho của bạn. Bạn có muốn tiếp tục không?\n>>> Like tin nhắn này để bán tất cả hoặc dislike để hủy <<<
-message.itemList=>>> Danh sách tiền của mọi loại cá <<<\n1/ Rác: 1 đô\n2/ Cá bình thường: 30 đô\n3/ Cá hiếm: 100 đô\n4/ Cua: 250 đô\n5/ Cá nóc: 300 đô\n6/ Cá sấu: 500 đô\n7/ Cá voi: 750 đô\n8/ Cá heo: 750 đô\n9/ Mực: 1000 đô\n10/ Cá mập: 1000 đô
+message.sellAllItems=Bạn sẽ nhận được %1 đô la sau khi bán tất cả các mặt hàng trong kho của bạn. Bạn có muốn tiếp tục không?\n=== Like tin nhắn này để bán tất cả hoặc dislike để hủy ===
+message.itemList==== Danh sách tiền của mọi loại cá ===\n1/ Rác: 1 đô\n2/ Cá bình thường: 30 đô\n3/ Cá hiếm: 100 đô\n4/ Cua: 250 đô\n5/ Cá nóc: 300 đô\n6/ Cá sấu: 500 đô\n7/ Cá voi: 750 đô\n8/ Cá heo: 750 đô\n9/ Mực: 1000 đô\n10/ Cá mập: 1000 đô
 message.stealFishCooldown=Bạn vừa ăn trộm, để tránh mất tất cả vật phẩm của mình, vui lòng quay lại sau: %1 phút %2 giây.
 message.intendSteal=Bạn định ăn cắp một %1, nhưng nạn nhân dường như chưa bắt được.
 message.stealFish=Bạn vừa trộm được một %2.
@@ -260,11 +259,11 @@ message.cmdNotFound=Lệnh bạn đã nhập không tồn tại. Ý bạn là %1
 message.keyboardHero=, cấp độ anh hùng bàn phím của bạn đã đạt đến cấp độ %1!
 
 # message_reply.js
-reply.askToChangePrefix=Prefix hiện tại %1\n>>> Để thay đổi, hãy trả lời tin nhắn này với prefix bạn muốn đổi thành <<<
-reply.askToChangeName=Tên bot hiện tại: %1\n>>> Để thay đổi, hãy trả lời tin nhắn này với tên bạn muốn đổi thành <<<
-reply.askToChangeAdmins=Admin hiện tại của bot: %1\n>>> Để thay đổi, hãy trả lời tin nhắn này với ID của admin bạn chọn. VD: uid1_uid2_... <<<
-reply.askToChangeLang=Ngôn ngữ hiện tại của bot: %1\n>>> Để thay đổi, hãy trả lời tin nhắn này với ngôn ngữ bạn muốn đổi thành Vd: vi/en <<<
-reply.askToChangeAutoRestart=Trạng thái tự động khởi động lại: %1\n>>> Để thay đổi, hãy trả lời tin nhắn này với tính năng on/off mà bạn muốn thay đổi thành <<<
+reply.askToChangePrefix=Prefix hiện tại %1\n=== Để thay đổi, hãy trả lời tin nhắn này với prefix bạn muốn đổi thành ===
+reply.askToChangeName=Tên bot hiện tại: %1\n=== Để thay đổi, hãy trả lời tin nhắn này với tên bạn muốn đổi thành ===
+reply.askToChangeAdmins=Admin hiện tại của bot: %1\n=== Để thay đổi, hãy trả lời tin nhắn này với ID của admin bạn chọn. VD: uid1_uid2_... ===
+reply.askToChangeLang=Ngôn ngữ hiện tại của bot: %1\n=== Để thay đổi, hãy trả lời tin nhắn này với ngôn ngữ bạn muốn đổi thành Vd: vi/en ===
+reply.askToChangeAutoRestart=Trạng thái tự động khởi động lại: %1\n=== Để thay đổi, hãy trả lời tin nhắn này với tính năng on/off mà bạn muốn thay đổi thành ===
 reply.newUpdate=Có bản cập nhật mới! Mở terminal/cmd và gõ "node update" để cập nhật!
 reply.noNewUpdate=Bạn đang sử dụng phiên bản mới nhất!
 reply.cantCheckUpdate=Không thể kiểm tra cập nhật. Vui lòng thử lại sau.

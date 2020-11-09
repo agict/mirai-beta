@@ -26,17 +26,19 @@ var langText = {};
 var langFile = (fs.readFileSync(`./app/handle/src/langs/${process.env.LANGUAGE}.lang`, { encoding: 'utf-8' })).split('\n');
 var langData = langFile.filter(item => item.indexOf('#') != 0 && item.indexOf('login.') == 0);
 for (let item of langData) {
-	let itemData = item.split('=');
-	let head = item.slice(0, item.indexOf('.') + 1);
-	let key = itemData[0].replace(head, '');
-	let value = itemData[1];
+	let getSeparator = item.indexOf('=');
+	let itemHead = item.slice(0, getSeparator);
+	let itemBody = item.slice(getSeparator + 1, item.length);
+	let head = itemHead.slice(0, itemHead.indexOf('.'));
+	let key = itemHead.replace(head + '.', '');
+	let value = itemBody.replace(/\\n/gi, '\n');
 	langText[key] = value;
 }
 
 function getText(...args) {
 	const getKey = args[0];
 	if (!langText.hasOwnProperty(getKey)) throw `${__filename} - Not found key language: ${getKey}`;
-	let text = langText[getKey].replace(/\\n/gi, '\n');
+	let text = langText[getKey];
 	for (let i = 1; i < args.length; i++) {
 		let regEx = RegExp(`%${i}`, 'g');
 		text = text.replace(regEx, args[i]);

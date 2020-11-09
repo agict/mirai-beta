@@ -1,7 +1,6 @@
 # If you want to break line, use \n. Eg: SpermLord\nCatalizcs.
 # After changes, you need to restart the bot to take effect.
 # Put a # symbol at head of line if you want that line does not run with code.
-# DO NOT USE = SYMBOL UNLESS IT IS USED TO DEFINE KEYS AND TEXTS
 
 # Fishing.js
 fishing.trashes=Trash(es)
@@ -73,9 +72,9 @@ message.disabledNSFW=Disabled NSFW successfully!
 message.alreadyOnNSFW=This group has not been turned off NSFW before!
 message.cantOnNSFW=Oops, NSFW cannot be enabled in this group!
 message.enabledNSFW=Enabled NSFW successfully!
-message.helpInfo=>>> Command Infomation <<<\n- Name: %1\n- Description: %2\n- Usage: %3\n- Eg: %4
+message.helpInfo==== Command Infomation ===\n- Name: %1\n- Description: %2\n- Usage: %3\n- Eg: %4
 message.adminHelpInvalid=The command you entered is invalid, type %1admin all to see all the admin commands.
-message.adminSetting1=🛠 | These are all the bot settings | 🛠\n\n=== Settings ===\n[1] Prefix.\n[2] Bot name.\n[3] Admins list.\n[4] Language.\n[5] Auto Refresh.
+message.adminSetting1=🛠 | These are all the bot settings | 🛠\n\n=== Configurations ===\n[1] Prefix.\n[2] Bot name.\n[3] Admins list.\n[4] Language.\n[5] Auto Refresh.
 message.adminSetting2=\n=== Operations ===\n[6] Check for update.\n[7] Get banned users list.\n[8] Get banned groups list.\n[9] Send notification to all groups.\n[10] Get user ID by their name.\n[11] Get group ID by its name.\n[12] Apply changes.\n-> To choose, reply this message with the number <-
 message.alreadyBannedUser=%1 - %2 already banned before.
 message.cantBanUser=Unable to ban this user.
@@ -128,7 +127,7 @@ message.noVA=There are no result with that keyword.
 message.foundVA=Found %1 result(s), choose 1 of them below:\n\n%2
 message.exceededLength=%1 length exceeded allowed, maximum 6 minutes!
 message.processVA=%1 is being processed, long %1 may take several seconds.
-message.allTags=>>> All %1 tags <<<\n%2
+message.allTags==== All %1 tags ===\n%2
 message.invalidTag=The tag you entered is invalid. Type %1help %2.
 message.replyPic=Please reply to the message that contains image.
 message.onePicOnly=Please reply the message has just one picture.
@@ -185,7 +184,7 @@ message.didntUnderstand=I didn't understand your input.
 message.mirai=My name is Mirai.
 message.created=I was created by CatalizCS and SpermLord.
 message.notSupportXYz=Reduced chemical equations are not currently supported. Convert (XY)z to the XzYz form.
-message.15secs=>>> You have 15 seconds to answer <<<\n%1
+message.15secs==== You have 15 seconds to answer ===\n%1
 message.offNSFW=NSFW is currently disabled in this group.
 message.idealCode=The ideal code is %1
 message.cantFindHentai=Can't find this hentai.
@@ -242,15 +241,15 @@ message.congratHero=Congrat %1! You arrested %2 and received %3 dollars as a rew
 message.noRod=It seem like you don't have any fishing rod. Buy a new one in shop!
 message.limitFishTime=Only fishing every %1 seconds.
 message.brokenRod=Your fishing rod seems to be broken, fix it in the shop.
-message.defeatMonster=>>> Oh no, you encounter the monster of this lake and have a(n) %1 difficulty, you have 15 seconds to answer the question to take down this monster <<<\n%2
+message.defeatMonster==== Oh no, you encounter the monster of this lake and have a(n) %1 difficulty, you have 15 seconds to answer the question to take down this monster ===\n%2
 message.caught=You caught a %1 😮
-message.inv1=>>> Your Inventory <<<\n- Your fishing rod level: %1 (Durability: %2/%3)\n- Current Exp: %4/%5\n
+message.inv1==== Your Inventory ===\n- Your fishing rod level: %1 (Durability: %2/%3)\n- Current Exp: %4/%5\n
 message.inv2=- All sea items:\n+ Trash(es): %1\n+ Normal fish(es): %2\n+ Rare fish(es): %3\n+ Crab(s): %4\n+ Blowfish(es): %5\n+ Crocodile: %6\n+ Whale(s): %7\n+ Dolphin(s): %8\n+ Squid(s): %9\n+ Shark(s): %10\n
 message.inv3=- Total of amount you can receive after sell all items: %1 dollars.
 message.noSellItem=Enter item you want to sell.
 message.sellItem=You sold %1 %2 and received %3 dollars.
-message.sellAllItems=You will receive %1 dollars after sell all items in your inventory. Do you want to continue?\n>>> Like this message to sell all or dislike this message to cancel <<<
-message.itemList=>>> Money list of items <<<\n1/ Trash: 1 dollar\n2/ Normal fish: 30 dollars\n3/ Rare fish: 100 dollars\n4/ Crab: 250 dollars\n5/ Blowfish: 300 dollars\n6/ Crocodile: 500 dollars\n7/ Whale: 750 dollars\n8/ Dolphin: 750 dollars\n9/ Squid: 1000 dollars\n10/ Shark: 1000 dollars
+message.sellAllItems=You will receive %1 dollars after sell all items in your inventory. Do you want to continue?\n=== Like this message to sell all or dislike this message to cancel ===
+message.itemList==== Money list of items ===\n1/ Trash: 1 dollar\n2/ Normal fish: 30 dollars\n3/ Rare fish: 100 dollars\n4/ Crab: 250 dollars\n5/ Blowfish: 300 dollars\n6/ Crocodile: 500 dollars\n7/ Whale: 750 dollars\n8/ Dolphin: 750 dollars\n9/ Squid: 1000 dollars\n10/ Shark: 1000 dollars
 message.stealFishCooldown=You just stole, to avoid losing all your items, please come back after: %1 minutes %2 seconds.
 message.intendSteal=You intend to steal a(n) %1, but the victim seems to didn't caught it yet.
 message.stealFish=You just stole a(n) %2.
@@ -260,11 +259,11 @@ message.cmdNotFound=The command you entered does not exist. You mean %1, right?
 message.keyboardHero=, your keyboard hero level has reached level %1!
 
 # message_reply.js
-reply.askToChangePrefix=Current bot prefix is: %1\n>>> To change, reply this message with the prefix you want to change to <<<
-reply.askToChangeName=Current bot name is: %1\n>>> To change, reply this message with the name you want to change to <<<
-reply.askToChangeAdmins=Current bot admins is: %1\n>>> To change, reply this message with the admins id you want to change to. Eg: uid1_uid2_... <<<
-reply.askToChangeLang=Current bot language is: %1\n>>> To change, reply this message with the language you want to change to <<<
-reply.askToChangeAutoRestart=Current bot auto restart is: %1\n>>> To change, reply this message with on/off you want to change to <<<
+reply.askToChangePrefix=Current bot prefix is: %1\n=== To change, reply this message with the prefix you want to change to ===
+reply.askToChangeName=Current bot name is: %1\n=== To change, reply this message with the name you want to change to ===
+reply.askToChangeAdmins=Current bot admins is: %1\n=== To change, reply this message with the admins id you want to change to. Eg: uid1_uid2_... ===
+reply.askToChangeLang=Current bot language is: %1\n=== To change, reply this message with the language you want to change to ===
+reply.askToChangeAutoRestart=Current bot auto restart is: %1\n=== To change, reply this message with on/off you want to change to ===
 reply.newUpdate=New update is available! Open terminal/cmd and type "node update" to update!
 reply.noNewUpdate=You are using the latest version!
 reply.cantCheckUpdate=Unable to check update. Please try again later.
