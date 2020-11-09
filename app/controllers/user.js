@@ -10,6 +10,16 @@ module.exports = function ({ models, api, __GLOBAL }) {
 		for (let i = 1; i < args.length; i++) text = text.replace(`%${i}`, args[i]);
 		return text;
 	}
+  
+  async function getColumn(attr = []) {
+		return User.findAll({ attributes: attr }).then(function(res) {
+			let points = [];
+			res.forEach(item => points.push(item.get({ plain: true })));
+			return points;
+		}).catch(err => {
+			return [];
+		});
+	}
 
 	async function createUser(uid) {
 		if (!await User.findOne({ where: { uid } })) {
@@ -126,6 +136,7 @@ module.exports = function ({ models, api, __GLOBAL }) {
 		getGender,
 		unban,
 		ban,
+    getColumn,
 		afk,
 		nonafk,
 		getReason,
